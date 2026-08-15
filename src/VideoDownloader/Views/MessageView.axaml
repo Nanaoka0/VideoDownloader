@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="VideoDownloader.Views.MessageView"
+        Icon="/Assets/app_icon/app_icon.ico"
+        Title="提示"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        SizeToContent="WidthAndHeight"
+        MinWidth="170"
+        MinHeight="110"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="40"
+        Background="{DynamicResource BackgroundLight}">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- ===== Custom Title Bar ===== -->
+    <Border Grid.Row="0" Classes="TitleBar" MinHeight="40"
+            WindowDecorationProperties.ElementRole="TitleBar">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="10,0,5,0">
+        <TextBlock Grid.Column="0" Classes="TitleText" x:Name="TitleBarText"
+                   VerticalAlignment="Center" Margin="0,0,24,0" />
+        <Button Grid.Column="2" Classes="WindowButton WindowButtonClose" Click="OnCloseClick"
+                WindowDecorationProperties.ElementRole="User" Margin="0,5,0,0" VerticalAlignment="Top">
+          <Button.Resources>
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E81123" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#B00618" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+          </Button.Resources>
+          <Panel Width="10" Height="10">
+            <Line StartPoint="0,0" EndPoint="10,10" Stroke="{DynamicResource TextLight}" StrokeThickness="1.2" />
+            <Line StartPoint="0,10" EndPoint="10,0" Stroke="{DynamicResource TextLight}" StrokeThickness="1.2" />
+          </Panel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" Margin="16,16,16,14">
+      <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="{DynamicResource TextTheme}" FontSize="12"
+                 TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+
+    <Border Grid.Row="2" Classes="DialogFooter" Padding="12,8">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Button x:Name="OkButton" Content="确定" Width="70" Height="30" Classes="Primary" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>

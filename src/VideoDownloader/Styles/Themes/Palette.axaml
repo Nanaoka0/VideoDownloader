@@ -1,0 +1,106 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- ════════════════════════════════════════════════════════════════
+       共享色板：三种样式的原始颜色。
+       任何主题的任何部分都可引用，格式：{样式名}.{颜色名}
+       例：Cyberpunk.ButtonLight、Neoclassical.TextDark
+       ════════════════════════════════════════════════════════════════ -->
+
+  <!-- ────────── Default 样式 ────────── -->
+  <!-- 亮背景色：窗口/内容区/卡片/输入框/表格背景 -->
+  <SolidColorBrush x:Key="Default.BackgroundLight" Color="#FFFFFF" />
+  <!-- 暗背景色：侧边栏/标题栏/菜单栏背景 -->
+  <SolidColorBrush x:Key="Default.BackgroundDark" Color="#1E293B" />
+  <!-- 亮标签色：选中标签填充 -->
+  <SolidColorBrush x:Key="Default.TabLight" Color="#FFFFFF" />
+  <!-- 暗标签色：未选中标签填充 -->
+  <SolidColorBrush x:Key="Default.TabDark" Color="#F1F5F9" />
+  <!-- 亮按钮色：主按钮背景/强调色（勾号、进度条、标签指示条、聚焦边框） -->
+  <SolidColorBrush x:Key="Default.ButtonLight" Color="#2563EB" />
+  <!-- 暗按钮色：次要按钮背景 -->
+  <SolidColorBrush x:Key="Default.ButtonDark" Color="#FFFFFF" />
+  <!-- 紧急按钮色：危险操作按钮/危险文字 -->
+  <SolidColorBrush x:Key="Default.ButtonDanger" Color="#EF4444" />
+  <!-- 悬浮按钮色：主按钮悬停背景 -->
+  <SolidColorBrush x:Key="Default.ButtonHover" Color="#3B82F6" />
+  <!-- 按下按钮色：按钮按下背景 -->
+  <SolidColorBrush x:Key="Default.ButtonPressed" Color="#1D4ED8" />
+  <!-- 主题文字色：主要文字 -->
+  <SolidColorBrush x:Key="Default.TextTheme" Color="#0F172A" />
+  <!-- 亮文字色：深色背景上的文字（标题栏/侧边栏/强调按钮文字） -->
+  <SolidColorBrush x:Key="Default.TextLight" Color="#FFFFFF" />
+  <!-- 暗文字色：次要/弱化文字、输入框占位符 -->
+  <SolidColorBrush x:Key="Default.TextDark" Color="#64748B" />
+  <!-- 分割线颜色：分隔线/卡片分割条 -->
+  <SolidColorBrush x:Key="Default.DividerColor" Color="#CBD5E1" />
+  <!-- 亮边框色：表格线/卡片边框/标签边框/悬停背景 -->
+  <SolidColorBrush x:Key="Default.BorderLight" Color="#E2E8F0" />
+  <!-- 暗边框色：输入框/次要按钮边框 -->
+  <SolidColorBrush x:Key="Default.BorderDark" Color="#CBD5E1" />
+
+  <!-- ────────── Cyberpunk 样式 ────────── -->
+  <!-- 亮背景色：窗口/内容区/卡片/输入框/表格背景（深紫黑） -->
+  <SolidColorBrush x:Key="Cyberpunk.BackgroundLight" Color="#1A1730" />
+  <!-- 暗背景色：侧边栏/标题栏/菜单栏背景（更深紫黑） -->
+  <SolidColorBrush x:Key="Cyberpunk.BackgroundDark" Color="#0E0A18" />
+  <!-- 亮标签色：选中标签填充（略亮于内容区，边界清晰） -->
+  <SolidColorBrush x:Key="Cyberpunk.TabLight" Color="#221E3C" />
+  <!-- 暗标签色：未选中标签填充 -->
+  <SolidColorBrush x:Key="Cyberpunk.TabDark" Color="#2A2450" />
+  <!-- 亮按钮色：主按钮背景/强调色（深青，白字清晰可读） -->
+  <SolidColorBrush x:Key="Cyberpunk.ButtonLight" Color="#008C9E" />
+  <!-- 暗按钮色：次要按钮背景（略亮于内容区） -->
+  <SolidColorBrush x:Key="Cyberpunk.ButtonDark" Color="#221E3C" />
+  <!-- 紧急按钮色：危险操作按钮/危险文字（霓虹粉） -->
+  <SolidColorBrush x:Key="Cyberpunk.ButtonDanger" Color="#FF2E63" />
+  <!-- 悬浮按钮色：主按钮悬停背景（更深青） -->
+  <SolidColorBrush x:Key="Cyberpunk.ButtonHover" Color="#007A91" />
+  <!-- 按下按钮色：按钮按下背景 -->
+  <SolidColorBrush x:Key="Cyberpunk.ButtonPressed" Color="#00697A" />
+  <!-- 主题文字色：主要文字（浅紫白） -->
+  <SolidColorBrush x:Key="Cyberpunk.TextTheme" Color="#E6E6FF" />
+  <!-- 亮文字色：深色背景上的文字（标题栏/侧边栏/强调按钮文字） -->
+  <SolidColorBrush x:Key="Cyberpunk.TextLight" Color="#FFFFFF" />
+  <!-- 暗文字色：次要/弱化文字、输入框占位符 -->
+  <SolidColorBrush x:Key="Cyberpunk.TextDark" Color="#B0A8E0" />
+  <!-- 分割线颜色：分隔线/卡片分割条（亮紫，清晰可见） -->
+  <SolidColorBrush x:Key="Cyberpunk.DividerColor" Color="#4E408C" />
+  <!-- 亮边框色：表格线/卡片边框/标签边框/悬停背景/选框边框（亮紫，深底上清晰可见） -->
+  <SolidColorBrush x:Key="Cyberpunk.BorderLight" Color="#6D5FB8" />
+  <!-- 暗边框色：输入框/次要按钮边框（更亮紫） -->
+  <SolidColorBrush x:Key="Cyberpunk.BorderDark" Color="#5A4A9E" />
+
+  <!-- ────────── Neoclassical 样式 ────────── -->
+  <!-- 亮背景色：窗口/内容区/卡片/输入框/表格背景（米色） -->
+  <SolidColorBrush x:Key="Neoclassical.BackgroundLight" Color="#FBF7EE" />
+  <!-- 暗背景色：侧边栏/标题栏/菜单栏背景（深棕） -->
+  <SolidColorBrush x:Key="Neoclassical.BackgroundDark" Color="#3B352B" />
+  <!-- 亮标签色：选中标签填充（米白） -->
+  <SolidColorBrush x:Key="Neoclassical.TabLight" Color="#F7F1E3" />
+  <!-- 暗标签色：未选中标签填充（浅褐） -->
+  <SolidColorBrush x:Key="Neoclassical.TabDark" Color="#E5DCC5" />
+  <!-- 亮按钮色：主按钮背景/强调色（复古黄铜金） -->
+  <SolidColorBrush x:Key="Neoclassical.ButtonLight" Color="#9B7B3F" />
+  <!-- 暗按钮色：次要按钮背景（米色） -->
+  <SolidColorBrush x:Key="Neoclassical.ButtonDark" Color="#FBF7EE" />
+  <!-- 紧急按钮色：危险操作按钮/危险文字（陶土红） -->
+  <SolidColorBrush x:Key="Neoclassical.ButtonDanger" Color="#A6492C" />
+  <!-- 悬浮按钮色：主按钮悬停背景（亮金） -->
+  <SolidColorBrush x:Key="Neoclassical.ButtonHover" Color="#B6905A" />
+  <!-- 按下按钮色：按钮按下背景（深金） -->
+  <SolidColorBrush x:Key="Neoclassical.ButtonPressed" Color="#7A5F2E" />
+  <!-- 主题文字色：主要文字（深棕黑） -->
+  <SolidColorBrush x:Key="Neoclassical.TextTheme" Color="#2C281F" />
+  <!-- 亮文字色：深色背景上的文字（标题栏/侧边栏/强调按钮文字） -->
+  <SolidColorBrush x:Key="Neoclassical.TextLight" Color="#FFFFFF" />
+  <!-- 暗文字色：次要/弱化文字、输入框占位符 -->
+  <SolidColorBrush x:Key="Neoclassical.TextDark" Color="#7A7159" />
+  <!-- 分割线颜色：分隔线/卡片分割条 -->
+  <SolidColorBrush x:Key="Neoclassical.DividerColor" Color="#C4B494" />
+  <!-- 亮边框色：表格线/卡片边框/标签边框/悬停背景 -->
+  <SolidColorBrush x:Key="Neoclassical.BorderLight" Color="#D8CDB6" />
+  <!-- 暗边框色：输入框/次要按钮边框 -->
+  <SolidColorBrush x:Key="Neoclassical.BorderDark" Color="#C4B494" />
+
+</ResourceDictionary>

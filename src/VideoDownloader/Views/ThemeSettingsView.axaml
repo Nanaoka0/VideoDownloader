@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:VideoDownloader.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="360"
+        x:Class="VideoDownloader.Views.ThemeSettingsView"
+        x:DataType="vm:SettingsViewModel">
+  <Border Classes="Card">
+    <StackPanel Spacing="10">
+      <TextBlock Text="外观样式" Classes="CardTitle" />
+      <Separator Classes="CardDivider" />
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <TextBlock Text="配色风格" Classes="SecondaryText" VerticalAlignment="Center" Width="72" />
+        <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Height="30" FontSize="12" />
+      </StackPanel>
+      <TextBlock Text="选择后立即生效，点击确定保存" Classes="FaintText" />
+    </StackPanel>
+  </Border>
+</UserControl>

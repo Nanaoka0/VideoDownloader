@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- 本主题文件由 App.axaml 合并；色板来自共享的 Palette.axaml（含全部三种样式的颜色）。
+       语义键（Theme.Default.*）可自由引用任意样式中的颜色，例：
+       把亮按钮色换成赛博朋克的霓虹青：
+       <StaticResource x:Key="Theme.Default.ButtonLight" ResourceKey="Cyberpunk.ButtonLight" /> -->
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://VideoDownloader/Styles/Themes/Palette.axaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ────────── 语义键映射：Default ────────── -->
+  <StaticResource x:Key="Theme.Default.BackgroundLight" ResourceKey="Default.BackgroundLight" />
+  <StaticResource x:Key="Theme.Default.BackgroundDark" ResourceKey="Default.BackgroundDark" />
+  <StaticResource x:Key="Theme.Default.TabLight" ResourceKey="Default.TabLight" />
+  <StaticResource x:Key="Theme.Default.TabDark" ResourceKey="Default.TabDark" />
+  <StaticResource x:Key="Theme.Default.ButtonLight" ResourceKey="Default.ButtonLight" />
+  <StaticResource x:Key="Theme.Default.ButtonDark" ResourceKey="Default.ButtonDark" />
+  <StaticResource x:Key="Theme.Default.ButtonDanger" ResourceKey="Default.ButtonDanger" />
+  <StaticResource x:Key="Theme.Default.ButtonHover" ResourceKey="Default.ButtonHover" />
+  <StaticResource x:Key="Theme.Default.ButtonPressed" ResourceKey="Default.ButtonPressed" />
+  <StaticResource x:Key="Theme.Default.TextTheme" ResourceKey="Default.TextTheme" />
+  <StaticResource x:Key="Theme.Default.TextLight" ResourceKey="Default.TextLight" />
+  <StaticResource x:Key="Theme.Default.TextDark" ResourceKey="Default.TextDark" />
+  <StaticResource x:Key="Theme.Default.DividerColor" ResourceKey="Default.DividerColor" />
+  <StaticResource x:Key="Theme.Default.BorderLight" ResourceKey="Default.BorderLight" />
+  <StaticResource x:Key="Theme.Default.BorderDark" ResourceKey="Default.BorderDark" />
+
+</ResourceDictionary>

@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- 本主题文件由 App.axaml 合并；色板来自共享的 Palette.axaml（含全部三种样式的颜色）。
+       语义键（Theme.Cyberpunk.*）可自由引用任意样式中的颜色，例：
+       把亮按钮色换成 Default 的蓝：
+       <StaticResource x:Key="Theme.Cyberpunk.ButtonLight" ResourceKey="Default.ButtonLight" /> -->
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://VideoDownloader/Styles/Themes/Palette.axaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ────────── 语义键映射：Cyberpunk ────────── -->
+  <StaticResource x:Key="Theme.Cyberpunk.BackgroundLight" ResourceKey="Cyberpunk.BackgroundLight" />
+  <StaticResource x:Key="Theme.Cyberpunk.BackgroundDark" ResourceKey="Cyberpunk.BackgroundDark" />
+  <StaticResource x:Key="Theme.Cyberpunk.TabLight" ResourceKey="Cyberpunk.TabLight" />
+  <StaticResource x:Key="Theme.Cyberpunk.TabDark" ResourceKey="Cyberpunk.TabDark" />
+  <StaticResource x:Key="Theme.Cyberpunk.ButtonLight" ResourceKey="Cyberpunk.ButtonLight" />
+  <StaticResource x:Key="Theme.Cyberpunk.ButtonDark" ResourceKey="Cyberpunk.ButtonDark" />
+  <StaticResource x:Key="Theme.Cyberpunk.ButtonDanger" ResourceKey="Cyberpunk.ButtonDanger" />
+  <StaticResource x:Key="Theme.Cyberpunk.ButtonHover" ResourceKey="Cyberpunk.ButtonHover" />
+  <StaticResource x:Key="Theme.Cyberpunk.ButtonPressed" ResourceKey="Cyberpunk.ButtonPressed" />
+  <StaticResource x:Key="Theme.Cyberpunk.TextTheme" ResourceKey="Cyberpunk.TextTheme" />
+  <StaticResource x:Key="Theme.Cyberpunk.TextLight" ResourceKey="Cyberpunk.TextLight" />
+  <StaticResource x:Key="Theme.Cyberpunk.TextDark" ResourceKey="Cyberpunk.TextDark" />
+  <StaticResource x:Key="Theme.Cyberpunk.DividerColor" ResourceKey="Cyberpunk.DividerColor" />
+  <StaticResource x:Key="Theme.Cyberpunk.BorderLight" ResourceKey="Cyberpunk.BorderLight" />
+  <StaticResource x:Key="Theme.Cyberpunk.BorderDark" ResourceKey="Cyberpunk.BorderDark" />
+
+</ResourceDictionary>

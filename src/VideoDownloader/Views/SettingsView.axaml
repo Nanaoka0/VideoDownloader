@@ -1,0 +1,73 @@
+<rxui:ReactiveWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:VideoDownloader.ViewModels"
+        xmlns:views="clr-namespace:VideoDownloader.Views"
+        xmlns:rxui="using:ReactiveUI.Avalonia"
+        x:Class="VideoDownloader.Views.SettingsView"
+        x:DataType="vm:SettingsViewModel"
+		Title="系统设置"
+        Icon="/Assets/app_icon/app_icon.ico"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        SizeToContent="WidthAndHeight"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="40"
+        Background="{DynamicResource BackgroundLight}">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- ===== Custom Title Bar ===== -->
+    <Border Grid.Row="0" Classes="TitleBar" MinHeight="40"
+            WindowDecorationProperties.ElementRole="TitleBar">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="10,0,5,0">
+        <TextBlock Grid.Column="0" Classes="TitleText" Text="系统设置" VerticalAlignment="Center" Margin="0,0,24,0" />
+        <Button Grid.Column="2" Classes="WindowButton WindowButtonClose" Click="OnCloseClick"
+                WindowDecorationProperties.ElementRole="User" Margin="0,5,0,0" VerticalAlignment="Top">
+          <Button.Resources>
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E81123" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#B00618" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+          </Button.Resources>
+          <Panel Width="10" Height="10">
+            <Line StartPoint="0,0" EndPoint="10,10" Stroke="{DynamicResource TextLight}" StrokeThickness="1.2" />
+            <Line StartPoint="0,10" EndPoint="10,0" Stroke="{DynamicResource TextLight}" StrokeThickness="1.2" />
+          </Panel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <ScrollViewer Grid.Row="1" Margin="16,12,16,12">
+      <Grid ColumnDefinitions="1*,1*" ColumnSpacing="16">
+        <!-- 左侧：代理设置 -->
+        <views:ProxySettingsView Grid.Column="0" DataContext="{Binding}" />
+
+        <!-- 右侧：其他设置 -->
+        <StackPanel Grid.Column="1" Spacing="16">
+          <views:DependencySettingsView DataContext="{Binding DependencyViewModel}" />
+          <views:ThemeSettingsView DataContext="{Binding}" />
+
+          <!-- Cookie 来源 -->
+          <Border Classes="Card" Padding="16">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
+                <TextBlock Text="Cookie 来源:" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" Height="32" ItemsSource="{Binding CookieBrowsers}" SelectedItem="{Binding CookieBrowser}"
+                          VerticalAlignment="Center" />
+              </Grid>
+              <TextBlock Text="选择浏览器后，下载时自动使用该浏览器中已登录的账号（yt-dlp --cookies-from-browser）。如需登录态，请先在所选浏览器中登录目标网站。" FontSize="11"
+                         Foreground="{DynamicResource TextDark}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+
+    <Border Grid.Row="2" Classes="DialogFooter" Padding="12,8">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Content="取消" Width="70" Height="30" Classes="Secondary" Command="{Binding CancelCloseCommand}" />
+        <Button Content="确定" Width="70" Height="30" Classes="Primary" Command="{Binding SaveAndCloseCommand}" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</rxui:ReactiveWindow>

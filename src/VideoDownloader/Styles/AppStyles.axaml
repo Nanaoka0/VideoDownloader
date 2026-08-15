@@ -1,0 +1,427 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Border.TitleBar">
+    <Setter Property="Background" Value="{DynamicResource BackgroundDark}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="TextBlock.TitleText">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.WindowButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Width" Value="38" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.WindowButton:hover, Button.WindowButton:pointerover">
+    <Setter Property="Background" Value="#22FFFFFF" />
+  </Style>
+  <Style Selector="Button.WindowButton:active, Button.WindowButton:pressed">
+    <Setter Property="Background" Value="#4DFFFFFF" />
+  </Style>
+  <Style Selector="Button.WindowButtonClose:hover, Button.WindowButtonClose:pointerover">
+    <Setter Property="Background" Value="#E81123" />
+  </Style>
+  <Style Selector="Button.WindowButtonClose:active, Button.WindowButtonClose:pressed">
+    <Setter Property="Background" Value="#B00618" />
+  </Style>
+  <Style Selector="Border.MenuBar">
+    <Setter Property="Background" Value="{DynamicResource BackgroundDark}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="Button.MenuItem">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+    <Setter Property="Height" Value="26" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.MenuItem:hover, Button.MenuItem:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DividerColor}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.MenuItem:active, Button.MenuItem:pressed">
+    <Setter Property="Background" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Button.Primary">
+    <Setter Property="Background" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.Primary:hover, Button.Primary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource ButtonHover}" />
+  </Style>
+  <Style Selector="Button.Primary:active">
+    <Setter Property="Background" Value="{DynamicResource ButtonPressed}" />
+  </Style>
+
+  <Style Selector="Button.Secondary">
+    <Setter Property="Background" Value="{DynamicResource ButtonDark}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.Secondary:hover, Button.Secondary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+  </Style>
+  <Style Selector="Button.Secondary:active">
+    <Setter Property="Background" Value="{DynamicResource ButtonPressed}" />
+  </Style>
+
+  <Style Selector="Button.SmallButton">
+    <Setter Property="Background" Value="{DynamicResource ButtonDark}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.SmallButton:hover, Button.SmallButton:pointerover">
+    <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="Button.SmallButton.Danger:hover, Button.SmallButton.Danger:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonDanger}" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonDanger}" />
+  </Style>
+
+  <Style Selector="Button.Danger">
+    <Setter Property="Background" Value="{DynamicResource ButtonDanger}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.Danger:hover, Button.Danger:pointerover">
+    <Setter Property="Opacity" Value="0.85" />
+  </Style>
+
+  <!-- Fluent 按钮模板在悬浮/按下/禁用状态会把内容前景写死为浅色系统的深色（黑色），
+       深色主题下看不清；与 CheckBox 同理，按按钮类补齐各状态的内容文字颜色。 -->
+  <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.Primary:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.Primary:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="Button.Secondary:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="Button.Secondary:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Button.SmallButton:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="Button.SmallButton:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="Button.SmallButton:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Button.SmallButton.Danger:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource ButtonDanger}" />
+  </Style>
+  <Style Selector="Button.SmallButton.Danger:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource ButtonDanger}" />
+  </Style>
+  <Style Selector="Button.Danger:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.Danger:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.Danger:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Button.MenuItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.MenuItem:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.MenuItem:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Button.WindowButton:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.WindowButton:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextLight}" />
+  </Style>
+  <Style Selector="Button.WindowButton:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextDark}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+  <Style Selector="TextBox:focus, TextBox:focus-within">
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="TextBox:hover:not(:focus), TextBox:pointerover:not(:focus)">
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+  <Style Selector="ComboBox:focus, ComboBox:focus-within">
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+  </Style>
+  <Style Selector="ComboBox:hover:not(:focus), ComboBox:pointerover:not(:focus)">
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonLight}" />
+  </Style>
+
+  <Style Selector="Window">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+
+  <Style Selector="CheckBox, RadioButton">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <!-- 所有选择器必须显式包含 :unchecked 状态，否则 Fluent 模板内部的
+       ^:unchecked /template/ 选择器（同等 specificity）会覆盖基础选择器。
+       行背景始终用内容背景色；选框用亮文字色边框（深底上清晰可见的空心方框/圆环）。 -->
+  <Style Selector="CheckBox:unchecked, RadioButton:unchecked,
+                   CheckBox:pointerover, RadioButton:pointerover,
+                   CheckBox:pressed, RadioButton:pressed,
+                   CheckBox:disabled, RadioButton:disabled,
+                   CheckBox:checked, RadioButton:checked,
+                   CheckBox:checked:pointerover, RadioButton:checked:pointerover,
+                   CheckBox:checked:pressed, RadioButton:checked:pressed,
+                   CheckBox:checked:disabled, RadioButton:checked:disabled">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextTheme}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
+  <Style Selector="CheckBox:unchecked /template/ ContentPresenter, RadioButton:unchecked /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:pointerover /template/ ContentPresenter, RadioButton:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:pressed /template/ ContentPresenter, RadioButton:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:disabled /template/ ContentPresenter, RadioButton:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ ContentPresenter, RadioButton:checked /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:checked:pointerover /template/ ContentPresenter, RadioButton:checked:pointerover /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:checked:pressed /template/ ContentPresenter, RadioButton:checked:pressed /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+  <Style Selector="CheckBox:checked:disabled /template/ ContentPresenter, RadioButton:checked:disabled /template/ ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+  </Style>
+
+  <!-- 选框（方框/圆环）：按模板元素名精确定位，避免误染整行背景。
+       未选中框用亮文字色边框（深底上清晰可见的空心方框/圆环），
+       选中时填充用主题强调色，对勾/圆点用亮文字色。 -->
+  <Style Selector="CheckBox:unchecked /template/ Border#NormalRectangle,
+                   CheckBox:pointerover /template/ Border#NormalRectangle,
+                   CheckBox:pressed /template/ Border#NormalRectangle,
+                   CheckBox:disabled /template/ Border#NormalRectangle">
+    <Setter Property="BorderBrush" Value="{DynamicResource TextTheme}" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ Border#NormalRectangle,
+                   CheckBox:checked:pointerover /template/ Border#NormalRectangle,
+                   CheckBox:checked:pressed /template/ Border#NormalRectangle,
+                   CheckBox:checked:disabled /template/ Border#NormalRectangle">
+    <Setter Property="BorderBrush" Value="{DynamicResource TextTheme}" />
+    <Setter Property="Background" Value="{DynamicResource ButtonLight}" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ Path,
+                   CheckBox:checked:pointerover /template/ Path,
+                   CheckBox:checked:pressed /template/ Path,
+                   CheckBox:checked:disabled /template/ Path">
+    <Setter Property="Fill" Value="{DynamicResource TextLight}" />
+  </Style>
+
+  <Style Selector="RadioButton:unchecked /template/ Ellipse#OuterEllipse,
+                   RadioButton:pointerover /template/ Ellipse#OuterEllipse,
+                   RadioButton:pressed /template/ Ellipse#OuterEllipse,
+                   RadioButton:disabled /template/ Ellipse#OuterEllipse">
+    <Setter Property="Stroke" Value="{DynamicResource TextTheme}" />
+    <Setter Property="Fill" Value="Transparent" />
+  </Style>
+  <Style Selector="RadioButton:checked /template/ Ellipse#OuterEllipse,
+                   RadioButton:checked:pointerover /template/ Ellipse#OuterEllipse,
+                   RadioButton:checked:pressed /template/ Ellipse#OuterEllipse,
+                   RadioButton:checked:disabled /template/ Ellipse#OuterEllipse">
+    <Setter Property="Stroke" Value="{DynamicResource TextTheme}" />
+    <Setter Property="Fill" Value="{DynamicResource BackgroundLight}" />
+  </Style>
+  <Style Selector="RadioButton:checked /template/ Ellipse#CheckOuterEllipse,
+                   RadioButton:checked:pointerover /template/ Ellipse#CheckOuterEllipse,
+                   RadioButton:checked:pressed /template/ Ellipse#CheckOuterEllipse,
+                   RadioButton:checked:disabled /template/ Ellipse#CheckOuterEllipse">
+    <Setter Property="Stroke" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="Fill" Value="{DynamicResource ButtonLight}" />
+  </Style>
+  <Style Selector="RadioButton:checked /template/ Ellipse#CheckGlyph,
+                   RadioButton:checked:pointerover /template/ Ellipse#CheckGlyph,
+                   RadioButton:checked:pressed /template/ Ellipse#CheckGlyph,
+                   RadioButton:checked:disabled /template/ Ellipse#CheckGlyph">
+    <Setter Property="Fill" Value="{DynamicResource TextLight}" />
+  </Style>
+
+  <Style Selector="ProgressBar">
+    <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonLight}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Height" Value="8" />
+  </Style>
+
+  <Style Selector="Border.Table">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+  <Style Selector="Border.TableHeader">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="0,0,0,2" />
+    <Setter Property="CornerRadius" Value="8,8,0,0" />
+  </Style>
+  <Style Selector="TextBlock.TableHeaderText">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+  <Style Selector="Border.TableRow">
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="Border.TableRow:hover, Border.TableRow:pointerover">
+    <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+  </Style>
+
+  <Style Selector="Border.StatusBar">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+
+  <Style Selector="Border.Card">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12" />
+  </Style>
+
+  <Style Selector="TextBlock.CardTitle">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonLight}" />
+  </Style>
+
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource DividerColor}" />
+  </Style>
+  <Style Selector="Separator.CardDivider">
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+
+  <Style Selector="TextBlock.StatusText">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+
+  <Style Selector="TextBlock.SecondaryText">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+
+  <Style Selector="TextBlock.FaintText">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource TextDark}" />
+  </Style>
+
+  <Style Selector="TextBox.Compact">
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="TextBox.SmallHeight">
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.DialogFooter">
+    <Setter Property="Background" Value="{DynamicResource BackgroundLight}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+</Styles>

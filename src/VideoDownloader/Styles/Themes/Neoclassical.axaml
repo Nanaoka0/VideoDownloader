@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- 本主题文件由 App.axaml 合并；色板来自共享的 Palette.axaml（含全部三种样式的颜色）。
+       语义键（Theme.Neoclassical.*）可自由引用任意样式中的颜色，例：
+       把亮按钮色换成 Cyberpunk 的青：
+       <StaticResource x:Key="Theme.Neoclassical.ButtonLight" ResourceKey="Cyberpunk.ButtonLight" /> -->
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://VideoDownloader/Styles/Themes/Palette.axaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ────────── 语义键映射：Neoclassical ────────── -->
+  <StaticResource x:Key="Theme.Neoclassical.BackgroundLight" ResourceKey="Neoclassical.BackgroundLight" />
+  <StaticResource x:Key="Theme.Neoclassical.BackgroundDark" ResourceKey="Neoclassical.BackgroundDark" />
+  <StaticResource x:Key="Theme.Neoclassical.TabLight" ResourceKey="Neoclassical.TabLight" />
+  <StaticResource x:Key="Theme.Neoclassical.TabDark" ResourceKey="Neoclassical.TabDark" />
+  <StaticResource x:Key="Theme.Neoclassical.ButtonLight" ResourceKey="Neoclassical.ButtonLight" />
+  <StaticResource x:Key="Theme.Neoclassical.ButtonDark" ResourceKey="Neoclassical.ButtonDark" />
+  <StaticResource x:Key="Theme.Neoclassical.ButtonDanger" ResourceKey="Neoclassical.ButtonDanger" />
+  <StaticResource x:Key="Theme.Neoclassical.ButtonHover" ResourceKey="Neoclassical.ButtonHover" />
+  <StaticResource x:Key="Theme.Neoclassical.ButtonPressed" ResourceKey="Neoclassical.ButtonPressed" />
+  <StaticResource x:Key="Theme.Neoclassical.TextTheme" ResourceKey="Neoclassical.TextTheme" />
+  <StaticResource x:Key="Theme.Neoclassical.TextLight" ResourceKey="Neoclassical.TextLight" />
+  <StaticResource x:Key="Theme.Neoclassical.TextDark" ResourceKey="Neoclassical.TextDark" />
+  <StaticResource x:Key="Theme.Neoclassical.DividerColor" ResourceKey="Neoclassical.DividerColor" />
+  <StaticResource x:Key="Theme.Neoclassical.BorderLight" ResourceKey="Neoclassical.BorderLight" />
+  <StaticResource x:Key="Theme.Neoclassical.BorderDark" ResourceKey="Neoclassical.BorderDark" />
+
+</ResourceDictionary>

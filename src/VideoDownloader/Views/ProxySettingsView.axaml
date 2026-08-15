@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:VideoDownloader.ViewModels"
+        x:Class="VideoDownloader.Views.ProxySettingsView"
+        x:DataType="vm:SettingsViewModel">
+  <Border Classes="Card">
+    <StackPanel Spacing="10">
+      <TextBlock Text="网络与代理设置" Classes="CardTitle" />
+      <Separator Classes="CardDivider" />
+      <CheckBox Content="启用代理服务器" IsChecked="{Binding UseProxy}" />
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <RadioButton Content="HTTP(S)" GroupName="ProxyGroup" IsChecked="{Binding IsHttpProxy}" Command="{Binding SelectHttpProxyCommand}" VerticalAlignment="Center" />
+        <TextBlock Text=":" VerticalAlignment="Center" Foreground="{DynamicResource TextDark}" />
+        <TextBox Text="{Binding HttpProxyHost}" Width="140" Height="28" Classes="Compact" />
+        <TextBlock Text=":" VerticalAlignment="Center" Foreground="{DynamicResource TextDark}" />
+        <TextBox Text="{Binding HttpProxyPort}" Width="56" Height="28" Classes="Compact" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <RadioButton Content="SOCKS5" GroupName="ProxyGroup" IsChecked="{Binding IsSocks5Proxy}" Command="{Binding SelectSocks5ProxyCommand}" VerticalAlignment="Center" />
+        <TextBlock Text=":" VerticalAlignment="Center" Foreground="{DynamicResource TextDark}" />
+        <TextBox Text="{Binding Socks5ProxyHost}" Width="140" Height="28" Classes="Compact" />
+        <TextBlock Text=":" VerticalAlignment="Center" Foreground="{DynamicResource TextDark}" />
+        <TextBox Text="{Binding Socks5ProxyPort}" Width="56" Height="28" Classes="Compact" />
+      </StackPanel>
+      <Button Content="测试网络连接 (youtube.com)" Command="{Binding TestNetworkCommand}" Height="28" Classes="Secondary Compact" />
+      <Separator Classes="CardDivider" />
+      <TextBlock Text="绕过代理" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextDark}" />
+      <CheckBox Content="bilibili 绕过代理" IsChecked="{Binding BypassBilibili}" />
+      <CheckBox Content="youtube 绕过代理" IsChecked="{Binding BypassYoutube}" />
+    </StackPanel>
+  </Border>
+</UserControl>

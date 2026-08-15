@@ -1,0 +1,24 @@
+# Build artifacts
+bin/
+obj/
+
+# Publish output
+publish/
+
+# Runtime downloaded tools
+.tools/
+
+# IDE / user files
+.vs/
+*.user
+
+# Runtime generated
+logs/
+config.json
+
+# Archives
+*.zip
+
+# OS
+Thumbs.db
+.DS_Store

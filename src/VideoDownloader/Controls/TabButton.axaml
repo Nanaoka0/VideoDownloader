@@ -1,0 +1,68 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:VideoDownloader.Controls">
+
+    <ControlTheme x:Key="{x:Type controls:TabButton}"
+                  TargetType="controls:TabButton">
+        <Setter Property="Background" Value="{DynamicResource TabDark}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderLight}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="ShowBorder" Value="True" />
+        <Setter Property="Foreground" Value="{DynamicResource TextTheme}" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Width" Value="112" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="controls:TabButton">
+                <Grid Background="Transparent">
+                    <!-- 填充路径：永不描边 -->
+                    <Path Data="{TemplateBinding Geometry}"
+                          Fill="{TemplateBinding Background}"
+                          Stretch="None" />
+                    <!-- 边线路径：由 ShowBorder 单独开关，填充用 Fill、描边用 BorderBrush -->
+                    <Path Data="{TemplateBinding Geometry}"
+                          Fill="{TemplateBinding Fill}"
+                          Stroke="{TemplateBinding BorderBrush}"
+                          StrokeThickness="{TemplateBinding StrokeThickness}"
+                          Stretch="None"
+                          IsVisible="{TemplateBinding ShowBorder}" />
+                    <ContentPresenter Content="{TemplateBinding Header}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,0,2" />
+                    <Border Width="26"
+                            Height="3"
+                            CornerRadius="1.5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,0,3"
+                            Background="{DynamicResource ButtonLight}"
+                            IsVisible="{TemplateBinding IsSelected}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.18" />
+                <BrushTransition Property="Foreground" Duration="0:0:0.18" />
+            </Transitions>
+        </Setter>
+
+        <!-- 三态颜色（Background Setter）仅对未绑定 Fill 的 TabButton 生效；
+             绑定了 Fill 时由 TabButton.UpdateFill() 按基色派生并写入本地 Background，
+             本地值优先级高于这里的样式值。两套共存，勿在此重复改色。 -->
+        <Style Selector="^:pointerover:not(:selected)">
+            <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+        </Style>
+        <Style Selector="^:pressed:not(:selected)">
+            <Setter Property="Background" Value="{DynamicResource BorderDark}" />
+        </Style>
+        <Style Selector="^:selected">
+            <Setter Property="Background" Value="{DynamicResource TabLight}" />
+            <Setter Property="Foreground" Value="{DynamicResource ButtonLight}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>
