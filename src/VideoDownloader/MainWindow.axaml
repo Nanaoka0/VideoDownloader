@@ -11,7 +11,7 @@
         x:Class="VideoDownloader.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/app_icon/app_icon.ico"
-        Title="VideoDownloader v1.0"
+        Title="VideoDownloader Alpha-0.0.01"
         Width="1180" Height="780"
         MinWidth="980" MinHeight="620"
         WindowStartupLocation="CenterScreen"
