@@ -73,7 +73,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
         var title = !string.IsNullOrWhiteSpace(existingTitle) ? existingTitle : await downloader.ParseTitleAsync(url, cancellationToken);
         var formats = await ParseFormatsWithYtDlpAsync(url, cancellationToken);
         if (formats.Count == 0)
-            throw new InvalidOperationException("无法获取视频格式，请检查网络连接或代理配置，或尝试在设置-Cookie 管理器中登录后重试");
+            throw new InvalidOperationException("无法获取视频格式，请检查网络连接或代理配置，或尝试在设置-选择 Cookie 来源后重试");
 
         var task = new DownloadTaskModel
         {
@@ -321,7 +321,8 @@ if (json.RootElement.TryGetProperty("url", out var u))
             _messenger.Send(new DownloadTaskProgressMessage(task.Id, task.Progress, task.DownloadedBytes, task.TotalBytes, task.Speed));
         });
 
-        var exitCode = await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken);
+        var exitCode = await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken,
+            pid => task.ProcessId = pid);
 
         if (cancellationToken.IsCancellationRequested)
         {
@@ -359,39 +360,42 @@ if (json.RootElement.TryGetProperty("url", out var u))
 
     public async Task ResumeDownloadAsync(DownloadTaskModel task, CancellationToken cancellationToken)
     {
-        if (task.Status == DownloadTaskStatus.Paused)
-        {
-            task.Status = DownloadTaskStatus.Downloading;
-            _messenger.Send(new DownloadTaskStatusChangedMessage(task.Id, task.Status));
+        if (task.Status != DownloadTaskStatus.Paused)
+            return;
 
-            var downloader = _siteDownloaders.FirstOrDefault(s => s.CanHandle(task.Url)) ?? _siteDownloaders.First();
-            var ytDlpPath = _toolPathResolver.ResolveToolPath("yt-dlp.exe");
-            if (string.IsNullOrEmpty(ytDlpPath) || task.SelectedFormat == null) return;
+        var downloader = _siteDownloaders.FirstOrDefault(s => s.CanHandle(task.Url)) ?? _siteDownloaders.First();
+        var ytDlpPath = _toolPathResolver.ResolveToolPath("yt-dlp.exe");
+        if (string.IsNullOrEmpty(ytDlpPath) || task.SelectedFormat == null)
+            return;
 
-try { Directory.CreateDirectory(task.OutputPath); }
+        task.Status = DownloadTaskStatus.Downloading;
+        _messenger.Send(new DownloadTaskStatusChangedMessage(task.Id, task.Status));
+
+        try { Directory.CreateDirectory(task.OutputPath); }
         catch (Exception ex) { _logger.LogException("Download", $"创建输出目录失败: {task.OutputPath}", ex); }
-            var arguments = downloader.BuildDownloadArguments(task.Url, task.SelectedFormat, task.OutputPath) + " -c";
-            var proxyArg = _config.ShouldBypassProxy(task.Url) ? string.Empty : _config.GetProxyArgument();
-            if (!string.IsNullOrEmpty(proxyArg))
-                arguments = $"{proxyArg} {arguments}";
-            var cookieArg = GetCookieArgument();
-            if (!string.IsNullOrEmpty(cookieArg))
-                arguments = $"{arguments} {cookieArg}";
 
-            var errorMessages = new List<string>();
-            var progress = new Progress<string>(line =>
+        var arguments = downloader.BuildDownloadArguments(task.Url, task.SelectedFormat, task.OutputPath) + " -c";
+        var proxyArg = _config.ShouldBypassProxy(task.Url) ? string.Empty : _config.GetProxyArgument();
+        if (!string.IsNullOrEmpty(proxyArg))
+            arguments = $"{proxyArg} {arguments}";
+        var cookieArg = GetCookieArgument();
+        if (!string.IsNullOrEmpty(cookieArg))
+            arguments = $"{arguments} {cookieArg}";
+
+        var errorMessages = new List<string>();
+        var progress = new Progress<string>(line =>
+        {
+            if (line.IndexOf("error:", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                if (line.IndexOf("error:", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogError("Download", $"yt-dlp 错误: {line}");
-                    errorMessages.Add(line);
-                }
-                ParseProgress(line, task);
-                _messenger.Send(new DownloadTaskProgressMessage(task.Id, task.Progress, task.DownloadedBytes, task.TotalBytes, task.Speed));
-            });
+                _logger.LogError("Download", $"yt-dlp 错误: {line}");
+                errorMessages.Add(line);
+            }
+            ParseProgress(line, task);
+            _messenger.Send(new DownloadTaskProgressMessage(task.Id, task.Progress, task.DownloadedBytes, task.TotalBytes, task.Speed));
+        });
 
-            await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken);
-        }
+        await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken,
+            pid => task.ProcessId = pid);
     }
 
     public Task CancelDownloadAsync(DownloadTaskModel task)

@@ -50,6 +50,7 @@ public class VideoConversionTaskModel
     public AudioCodec AudioCodec { get; set; } = AudioCodec.AAC;
     public bool IsSelected { get; set; } = true;
     public string? ErrorMessage { get; set; }
+    public double DurationSeconds { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public int ProcessId { get; set; }
 }

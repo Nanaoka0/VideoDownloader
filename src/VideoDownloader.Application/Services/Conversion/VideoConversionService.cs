@@ -64,6 +64,7 @@ public class VideoConversionService : IVideoConversionService
             return;
         }
 
+        task.DurationSeconds = await ProbeDurationAsync(task);
         var arguments = BuildFfmpegArguments(task);
         _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
 
@@ -124,11 +125,14 @@ public class VideoConversionService : IVideoConversionService
         return Task.CompletedTask;
     }
 
-    /// <summary>删除：终止 ffmpeg 进程并删除未完成的输出文件（任务本身由界面移除）。</summary>
+    /// <summary>删除：仅当仍在转换时终止 ffmpeg 并删除未完成输出；已完成任务保留成品文件（任务由界面移除）。</summary>
     public Task CancelConversionAsync(VideoConversionTaskModel task)
     {
-        _processRunner.KillProcess(task.ProcessId);
-        DeleteUnfinishedOutput(task);
+        if (task.Status == ConversionTaskStatus.Converting)
+        {
+            _processRunner.KillProcess(task.ProcessId);
+            DeleteUnfinishedOutput(task);
+        }
         task.Status = ConversionTaskStatus.Cancelled;
         task.Progress = 0;
         _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
@@ -199,13 +203,41 @@ public class VideoConversionService : IVideoConversionService
         return Path.Combine(directory, $"{fileName}（{counter}）{ext}");
     }
 
+    /// <summary>用 ffprobe 探测输入媒体时长（秒）；失败或超时返回 0（进度退化为不精确估算）。</summary>
+    private async Task<double> ProbeDurationAsync(VideoConversionTaskModel task)
+    {
+        var ffprobePath = _toolPathResolver.ResolveToolPath("ffprobe.exe");
+        if (ffprobePath == null)
+            return 0;
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var output = await _processRunner.RunProcessAndReadOutputAsync(ffprobePath,
+                $"-v error -show_entries format=duration -of csv=p=0 \"{task.InputFilePath}\"", cts.Token);
+            if (double.TryParse(output?.Trim(),
+                    System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var duration) && duration > 0)
+                return duration;
+        }
+        catch
+        {
+            // ffprobe 失败不影响转换本身
+        }
+        return 0;
+    }
+
     private static void ParseProgress(string line, VideoConversionTaskModel task)
     {
         var timeMatch = Regex.Match(line, @"out_time_us=(\d+)");
         if (timeMatch.Success && long.TryParse(timeMatch.Groups[1].Value, out var outTimeUs))
         {
-            var progress = (outTimeUs / 10_000_000.0) % 100;
-            task.Progress = Math.Min(progress, 99.9);
+            var outSeconds = outTimeUs / 10_000_000.0;
+            if (task.DurationSeconds > 0)
+                task.Progress = Math.Min(outSeconds / task.DurationSeconds * 100, 99.9);
+            else
+                task.Progress = Math.Min(outSeconds % 100, 99.9);
         }
 
         var progressMatch = Regex.Match(line, @"progress=(\w+)");
