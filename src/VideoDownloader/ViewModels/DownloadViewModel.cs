@@ -90,6 +90,9 @@ public partial class DownloadViewModel : ReactiveObject
             .Throttle(TimeSpan.FromMilliseconds(400))
             .Subscribe(_ => SaveConfig());
 
+        this.WhenAnyValue(x => x.MaxConcurrentDownloads)
+            .Subscribe(v => _concurrencySemaphore = new SemaphoreSlim(v, v));
+
         _messenger.Subscribe<DownloadTaskCompletedMessage>(OnTaskCompleted);
     }
 
@@ -136,7 +139,7 @@ public partial class DownloadViewModel : ReactiveObject
                 SiteName = new Uri(url).Host,
                 Title = string.Empty
             };
-            var item = new DownloadItemViewModel(task, _downloadService, _messenger, RemoveTask, _fileCleanupService, _logger);
+            var item = new DownloadItemViewModel(task, _downloadService, _messenger, RemoveTask, _fileCleanupService, _logger, _concurrencySemaphore);
             Tasks.Add(item);
             _ = FetchTitleAsync(item, url);
         }
@@ -282,7 +285,6 @@ public partial class DownloadViewModel : ReactiveObject
         _messenger.Send(new StatusUpdateMessage("正在开始下载..."));
         var pending = Tasks.Where(t => t.Task.Status == DownloadTaskStatus.Pending).ToList();
         if (pending.Count == 0) return;
-        _concurrencySemaphore = new SemaphoreSlim(MaxConcurrentDownloads, MaxConcurrentDownloads);
         foreach (var item in pending)
             _ = RunTaskAsync(item);
     }
@@ -292,7 +294,7 @@ public partial class DownloadViewModel : ReactiveObject
     {
         _messenger.Send(new StatusUpdateMessage("正在暂停所有任务..."));
         foreach (var item in Tasks.Where(t => t.Task.Status == DownloadTaskStatus.Downloading))
-            _ = item.PauseCommand.Execute(Unit.Default).Subscribe();
+            _ = item.PauseCommand.Execute(Unit.Default).Subscribe(_ => { }, ex => _logger.LogException("Download", "暂停任务失败", ex));
         _messenger.Send(new StatusUpdateMessage("已暂停所有下载"));
     }
 
@@ -301,7 +303,7 @@ public partial class DownloadViewModel : ReactiveObject
     {
         _messenger.Send(new StatusUpdateMessage("正在删除所有任务..."));
         foreach (var item in Tasks.ToList())
-            _ = item.DeleteCommand.Execute(Unit.Default).Subscribe();
+            _ = item.DeleteCommand.Execute(Unit.Default).Subscribe(_ => { }, ex => _logger.LogException("Download", "删除任务失败", ex));
         _messenger.Send(new StatusUpdateMessage("已删除所有任务"));
     }
 

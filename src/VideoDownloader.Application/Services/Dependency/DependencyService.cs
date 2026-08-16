@@ -31,6 +31,8 @@ public class DependencyService : IDependencyService
         ["yt-dlp"] = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
     };
 
+    private bool _nvencVerified;
+
     public DependencyService(IEventMessenger messenger, IProcessRunner processRunner, IToolPathResolver toolPathResolver, IDownloadConfiguration config, IGpuInfoService gpuInfoService, ILogger logger)
     {
         _messenger = messenger;
@@ -133,8 +135,9 @@ public class DependencyService : IDependencyService
             catch (OperationCanceledException)
             {
                 throw;
-            }
-            catch (Exception ex)
+_nvencVerified = true;
+        }
+        catch (Exception ex)
             {
                 lastException = ex;
                 _logger.LogException("Dependency", $"ffmpeg 下载失败（源：{url}）", ex);
@@ -191,9 +194,12 @@ public class DependencyService : IDependencyService
             throw new InvalidDataException("压缩包中未找到 ffmpeg.exe/ffprobe.exe");
     }
 
-    /// <summary>下载后自检 NVENC 是否可用（仅 NVIDIA 显卡），不可用时给出可读提示。</summary>
+    /// <summary>下载后自检 NVENC 是否可用（仅 NVIDIA 显卡），不可用时给出可读提示。进程生命周期内只检测一次。</summary>
     private async Task VerifyNvencAsync(string ffmpegPath, bool notifyUser)
     {
+        if (_nvencVerified)
+            return;
+
         var gpu = _gpuInfoService.Detect();
         if (gpu.Vendor != GpuVendor.Nvidia)
             return;
@@ -216,6 +222,7 @@ public class DependencyService : IDependencyService
                         "建议更新显卡驱动，或改用软件编码器（libx264 / libsvtav1）。"));
                 }
             }
+            _nvencVerified = true;
         }
         catch (Exception ex)
         {

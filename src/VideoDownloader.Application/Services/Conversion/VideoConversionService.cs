@@ -46,7 +46,6 @@ public class VideoConversionService : IVideoConversionService
             task.Status = ConversionTaskStatus.Failed;
             task.ErrorMessage = "ffmpeg 未找到";
             _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
-            _messenger.Send(new ConversionTaskCompletedMessage(task.Id, false, task.ErrorMessage));
             return;
         }
 
@@ -60,7 +59,6 @@ public class VideoConversionService : IVideoConversionService
             task.Status = ConversionTaskStatus.Failed;
             task.ErrorMessage = "未选择视频编码器，请在任务中选择编码器";
             _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
-            _messenger.Send(new ConversionTaskCompletedMessage(task.Id, false, task.ErrorMessage));
             return;
         }
 
@@ -108,7 +106,6 @@ public class VideoConversionService : IVideoConversionService
         }
 
         _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
-        _messenger.Send(new ConversionTaskCompletedMessage(task.Id, task.Status == ConversionTaskStatus.Completed, task.ErrorMessage));
     }
 
     /// <summary>停止：终止 ffmpeg 进程并删除未完成的输出文件，任务保留（状态回到已停止，可重新开始）。</summary>
@@ -136,7 +133,6 @@ public class VideoConversionService : IVideoConversionService
         task.Status = ConversionTaskStatus.Cancelled;
         task.Progress = 0;
         _messenger.Send(new ConversionTaskStatusChangedMessage(task.Id, task.Status));
-        _messenger.Send(new ConversionTaskCompletedMessage(task.Id, false, "用户取消"));
         return Task.CompletedTask;
     }
 

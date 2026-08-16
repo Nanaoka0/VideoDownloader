@@ -22,6 +22,7 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     private readonly IEventMessenger _messenger;
     private readonly IFileCleanupService _fileCleanupService;
     private readonly ILogger _logger;
+    private readonly SemaphoreSlim _concurrencySemaphore;
     private CancellationTokenSource? _cts;
     private readonly List<IDisposable> _subscriptions = new();
     private readonly Action<DownloadItemViewModel> _onRemove;
@@ -58,7 +59,8 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
         IEventMessenger messenger,
         Action<DownloadItemViewModel> onRemove,
         IFileCleanupService fileCleanupService,
-        ILogger logger)
+        ILogger logger,
+        SemaphoreSlim concurrencySemaphore)
     {
         _task = task;
         _downloadService = downloadService;
@@ -66,6 +68,7 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
         _onRemove = onRemove;
         _fileCleanupService = fileCleanupService;
         _logger = logger;
+        _concurrencySemaphore = concurrencySemaphore;
         _selectedFormat = task.SelectedFormat;
         _taskTitle = task.Title;
 
@@ -114,33 +117,41 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     public async Task Start()
     {
         if (IsRunning) return;
-        if (AvailableFormats.Count == 0)
-        {
-            await FetchResolutions();
-            if (Task.Status == DownloadTaskStatus.Failed) return;
-        }
-        if (SelectedFormat == null && AvailableFormats.Count > 0)
-            SelectedFormat = Enumerable.FirstOrDefault(AvailableFormats, f => f.HasVideo) ?? AvailableFormats[0];
-        if (SelectedFormat == null) return;
-        IsRunning = true;
-        _cts = new CancellationTokenSource();
-        Task.Status = DownloadTaskStatus.Waiting;
-        UpdateStatusDisplay();
+        await _concurrencySemaphore.WaitAsync();
         try
         {
-            await _downloadService.StartDownloadAsync(Task, _cts.Token);
+            if (AvailableFormats.Count == 0)
+            {
+                await FetchResolutions();
+                if (Task.Status == DownloadTaskStatus.Failed) return;
+            }
+            if (SelectedFormat == null && AvailableFormats.Count > 0)
+                SelectedFormat = Enumerable.FirstOrDefault(AvailableFormats, f => f.HasVideo) ?? AvailableFormats[0];
+            if (SelectedFormat == null) return;
+            IsRunning = true;
+            _cts = new CancellationTokenSource();
+            Task.Status = DownloadTaskStatus.Waiting;
+            UpdateStatusDisplay();
+            try
+            {
+                await _downloadService.StartDownloadAsync(Task, _cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Task.Status = DownloadTaskStatus.Cancelled;
+            }
+            catch (Exception ex)
+            {
+                Task.Status = DownloadTaskStatus.Pending;
+                Task.ErrorMessage = ex.Message;
+            }
+            IsRunning = false;
+            UpdateStatusDisplay();
         }
-        catch (OperationCanceledException)
+        finally
         {
-            Task.Status = DownloadTaskStatus.Cancelled;
+            _concurrencySemaphore.Release();
         }
-        catch (Exception ex)
-        {
-            Task.Status = DownloadTaskStatus.Pending;
-            Task.ErrorMessage = ex.Message;
-        }
-        IsRunning = false;
-        UpdateStatusDisplay();
     }
 
     [ReactiveCommand]

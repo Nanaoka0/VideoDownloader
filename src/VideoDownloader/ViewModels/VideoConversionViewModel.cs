@@ -91,7 +91,7 @@ public partial class VideoConversionViewModel : ReactiveObject
     {
         _messenger.Send(new StatusUpdateMessage("正在取消所有任务..."));
         foreach (var item in Tasks)
-            _ = item.CancelCommand.Execute(Unit.Default).Subscribe();
+            _ = item.CancelCommand.Execute(Unit.Default).Subscribe(_ => { }, ex => _logger.LogException("Conversion", "取消任务失败", ex));
         _messenger.Send(new StatusUpdateMessage("已取消所有任务"));
     }
 }
