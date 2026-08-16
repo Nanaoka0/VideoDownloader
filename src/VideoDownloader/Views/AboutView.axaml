@@ -35,7 +35,7 @@
 
     <StackPanel Grid.Row="1" Margin="24,20" Spacing="10" VerticalAlignment="Center">
       <TextBlock Text="VideoDownloader" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextTheme}" HorizontalAlignment="Center" />
-      <TextBlock Text="版本 Alpha-0.0.01" Classes="SecondaryText" HorizontalAlignment="Center" />
+      <TextBlock Text="版本 0.1.0-alpha" Classes="SecondaryText" HorizontalAlignment="Center" />
       <Separator Margin="0,4" Classes="CardDivider" />
       <TextBlock Text="基于 .NET 9 + Avalonia UI 构建的桌面视频下载与转码工具" Classes="SecondaryText" TextWrapping="Wrap" TextAlignment="Center" />
       <TextBlock Text="底层引擎: yt-dlp + ffmpeg" Classes="SecondaryText" HorizontalAlignment="Center" />
