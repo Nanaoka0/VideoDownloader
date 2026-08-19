@@ -20,7 +20,7 @@ internal static class SiteTitleResolver
 
         var proxyArg = config.ShouldBypassProxy(url) ? string.Empty : config.GetProxyArgument();
         var cookieArg = GetCookieArgument(config);
-        var arguments = $"--skip-download --no-playlist --no-warnings --print title {proxyArg} {cookieArg} \"{url}\"";
+        var arguments = $"--skip-download --no-playlist --no-warnings --print title {proxyArg} {cookieArg} --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36\" \"{url}\"";
         try
         {
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

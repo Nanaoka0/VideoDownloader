@@ -40,7 +40,7 @@ public class DownloadService : IDownloadService
 
         var urls = new List<string>();
         var proxyArg = _config.ShouldBypassProxy(url) ? string.Empty : _config.GetProxyArgument();
-        var arguments = $"--flat-playlist --dump-json --no-warnings {proxyArg} \"{url}\"";
+        var arguments = $"--flat-playlist --dump-json --no-warnings {proxyArg} {GetUserAgentArgument()} \"{url}\"";
         var progress = new Progress<string>(line =>
         {
             try
@@ -105,7 +105,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
         var errorLines = new List<string>();
         var proxyArg = _config.ShouldBypassProxy(url) ? string.Empty : _config.GetProxyArgument();
         var cookieArg = GetCookieArgument();
-        var arguments = $"-F --no-warnings {proxyArg} {cookieArg} \"{url}\"";
+        var arguments = $"-F --no-warnings {proxyArg} {cookieArg} {GetUserAgentArgument()} \"{url}\"";
         var progress = new Progress<string>(line =>
         {
             try
@@ -306,8 +306,11 @@ if (json.RootElement.TryGetProperty("url", out var u))
         if (!string.IsNullOrEmpty(proxyArg))
             arguments = $"{proxyArg} {arguments}";
         var cookieArg = GetCookieArgument();
+        var uaArg = GetUserAgentArgument();
         if (!string.IsNullOrEmpty(cookieArg))
             arguments = $"{arguments} {cookieArg}";
+        if (!string.IsNullOrEmpty(uaArg))
+            arguments = $"{arguments} {uaArg}";
 
         var errorMessages = new List<string>();
         var progress = new Progress<string>(line =>
@@ -379,8 +382,11 @@ if (json.RootElement.TryGetProperty("url", out var u))
         if (!string.IsNullOrEmpty(proxyArg))
             arguments = $"{proxyArg} {arguments}";
         var cookieArg = GetCookieArgument();
+        var uaArg = GetUserAgentArgument();
         if (!string.IsNullOrEmpty(cookieArg))
             arguments = $"{arguments} {cookieArg}";
+        if (!string.IsNullOrEmpty(uaArg))
+            arguments = $"{arguments} {uaArg}";
 
         var errorMessages = new List<string>();
         var progress = new Progress<string>(line =>
@@ -468,4 +474,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
             return string.Empty;
         return $"--cookies-from-browser {browser}";
     }
+
+    private static string GetUserAgentArgument() =>
+        "--user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36\"";
 }
