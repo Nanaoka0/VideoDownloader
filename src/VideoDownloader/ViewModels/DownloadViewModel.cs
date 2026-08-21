@@ -309,15 +309,7 @@ public partial class DownloadViewModel : ReactiveObject
 
     private async Task RunTaskAsync(DownloadItemViewModel item)
     {
-        await _concurrencySemaphore.WaitAsync();
-        try
-        {
-            await item.StartCommand.Execute(Unit.Default).ToTask();
-        }
-        finally
-        {
-            _concurrencySemaphore.Release();
-        }
+        await item.StartCommand.Execute(Unit.Default).ToTask();
     }
 
     public void SaveConfig()

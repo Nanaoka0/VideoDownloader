@@ -145,6 +145,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
     {
         if (string.IsNullOrWhiteSpace(line)) return null;
         if (line.StartsWith("ID") || line.StartsWith("---") || line.Contains("has no formats")) return null;
+        if (line.Contains("dubbed-auto", StringComparison.OrdinalIgnoreCase)) return null;
 
         var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length < 2) return null;
@@ -208,7 +209,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
             format.VideoCodec = "H.265";
             format.HasVideo = true;
         }
-        else if (fullLine.Contains("vp9"))
+        else if (fullLine.Contains("vp9") || fullLine.Contains("vp09"))
         {
             format.VideoCodec = "VP9";
             format.HasVideo = true;
@@ -250,13 +251,21 @@ if (json.RootElement.TryGetProperty("url", out var u))
             format.HasAudio = true;
         }
 
-        // Parse audio bitrate (e.g. "44k", "128k", "160k")
-        if (format.HasAudio)
+        // Parse bitrate: video -> "86k video only", audio -> "audio only <codec> 49k 22k"
+        if (fullLine.Contains("video only"))
         {
-            var brMatch = Regex.Match(line, @"\b(\d+)\s*k\b", RegexOptions.RightToLeft);
+            var brMatch = Regex.Match(line, @"(\d+)\s*k\s+video only");
             if (brMatch.Success && double.TryParse(brMatch.Groups[1].Value, out var br))
                 format.Bitrate = br;
         }
+        else if (fullLine.Contains("audio only"))
+        {
+            var brMatch = Regex.Match(line, @"audio only\s+\S+\s+(\d+)\s*k");
+            if (brMatch.Success && double.TryParse(brMatch.Groups[1].Value, out var br))
+                format.Bitrate = br;
+        }
+
+        format.IsHls = fullLine.Contains("m3u8");
 
         if (fullLine.Contains("webm")) format.Extension = "webm";
         else if (fullLine.Contains("m4a")) format.Extension = "m4a";
@@ -438,7 +447,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
         }
         else
         {
-            var ofMatch = Regex.Match(line, @"(\d+\.?\d*)%\s*of\s*(\d+\.?\d*)([KMGT]?i?B)");
+            var ofMatch = Regex.Match(line, @"(\d+\.?\d*)%\s*of\s*~?\s*(\d+\.?\d*)([KMGT]?i?B)");
             if (ofMatch.Success
                 && double.TryParse(ofMatch.Groups[1].Value, out var pctOf)
                 && double.TryParse(ofMatch.Groups[2].Value, out var total))

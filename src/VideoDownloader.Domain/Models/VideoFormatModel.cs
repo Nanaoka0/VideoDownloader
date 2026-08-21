@@ -14,6 +14,7 @@ public class VideoFormatModel
     public bool HasVideo { get; set; }
     public bool HasAudio { get; set; }
     public bool IsHdr { get; set; }
+    public bool IsHls { get; set; }
     public int Fps { get; set; }
     public bool IsAudioOnly => !HasVideo && HasAudio;
     public string DisplayName
@@ -30,6 +31,8 @@ public class VideoFormatModel
             var codec = string.IsNullOrWhiteSpace(VideoCodec) ? "未知编码" : VideoCodec;
             var hdr = IsHdr ? " HDR" : "";
             var fps = Fps > 0 ? $" {Fps}fps" : "";
+            var bitrate = Bitrate > 0 ? $" {Bitrate:F0}kbps" : "";
+            var hls = IsHls ? " HLS" : "";
             var resolution = Width > 0 && Height > 0
                 ? $"{Resolution} ({Width}x{Height})"
                 : (string.IsNullOrWhiteSpace(Resolution) ? FormatId : Resolution);
@@ -38,7 +41,7 @@ public class VideoFormatModel
                 ? $" + {AudioCodec}"
                 : "";
 
-            return $"{resolution}{fps}{hdr} [{codec}]{audio}";
+            return $"{resolution}{fps}{hdr} [{codec}]{bitrate}{hls}{audio}";
         }
     }
 }
