@@ -5,13 +5,17 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using ReactiveUI;
+using VisualTreeAttachmentEventArgs = Avalonia.VisualTreeAttachmentEventArgs;
 using VideoDownloader.ViewModels;
 
 namespace VideoDownloader.Views;
 
 public partial class DownloadView : UserControl
 {
+    private IDisposable? _handlerSub;
+
     public DownloadView()
     {
         InitializeComponent();
@@ -19,7 +23,18 @@ public partial class DownloadView : UserControl
         this.WhenAnyValue(x => x.DataContext)
             .Where(x => x is DownloadViewModel)
             .Select(x => (DownloadViewModel)x!)
-            .Subscribe(vm => vm.PickOutputFolder.RegisterHandler(PickOutputFolderAsync));
+            .Subscribe(vm =>
+            {
+                _handlerSub?.Dispose();
+                _handlerSub = vm.PickOutputFolder.RegisterHandler(PickOutputFolderAsync);
+            });
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        _handlerSub?.Dispose();
+        _handlerSub = null;
+        base.OnDetachedFromVisualTree(e);
     }
 
     private async Task PickOutputFolderAsync(IInteractionContext<Unit, string?> context)
@@ -37,6 +52,7 @@ public partial class DownloadView : UserControl
             AllowMultiple = false
         });
 
-        context.SetOutput(folders.FirstOrDefault()?.Path.LocalPath);
+        var folder = folders.FirstOrDefault();
+        context.SetOutput(folder?.TryGetLocalPath());
     }
 }

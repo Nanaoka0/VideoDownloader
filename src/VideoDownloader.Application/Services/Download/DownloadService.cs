@@ -138,7 +138,33 @@ if (json.RootElement.TryGetProperty("url", out var u))
         if (formats.Count == 0 && errorLines.Count > 0)
             throw new InvalidOperationException(errorLines[^1]);
 
+        ApplyCompanionAudioSizes(formats);
         return formats;
+    }
+
+    /// <summary>为仅视频流格式预匹配下载时将自动搭配的音频流（规则与 DownloadFormatHelpers 一致：mp4→m4a、webm→webm、其它→最大音频），用于下拉列表显示视频+音频合计大小。</summary>
+    private static void ApplyCompanionAudioSizes(List<VideoFormatModel> formats)
+    {
+        var audioFormats = formats.Where(f => f.IsAudioOnly && f.FileSize > 0).ToList();
+        foreach (var format in formats)
+        {
+            if (!format.HasVideo || format.HasAudio) continue;
+
+            var preferExt = format.Extension switch
+            {
+                "webm" => "webm",
+                "mp4" or "m4a" => "m4a",
+                _ => null
+            };
+            var audio = audioFormats
+                .OrderByDescending(f => preferExt != null && f.Extension.Equals(preferExt, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(f => f.FileSize)
+                .FirstOrDefault();
+            if (audio == null) continue;
+
+            format.CompanionAudioSize = audio.FileSize;
+            format.CompanionAudioEstimated = audio.FileSizeEstimated;
+        }
     }
 
     private static VideoFormatModel? ParseYtDlpFormatLine(string line)
@@ -155,6 +181,24 @@ if (json.RootElement.TryGetProperty("url", out var u))
 
         var format = new VideoFormatModel { FormatId = parts[0] };
         var fullLine = line.ToLowerInvariant();
+
+        // 解析 -F 表格中的 FILESIZE 列（位于第一个和第二个竖线之间，可能带 "~" 表示估算值，或为空）
+        var pipeSegments = line.Split('│', '|');
+        if (pipeSegments.Length >= 2)
+        {
+            var sizeToken = pipeSegments[1].Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (!string.IsNullOrEmpty(sizeToken))
+            {
+                var estimated = sizeToken.StartsWith('~');
+                var token = estimated ? sizeToken[1..] : sizeToken;
+                var sizeMatch = Regex.Match(token, @"^(\d+\.?\d*)([KMGT]i?B)$");
+                if (sizeMatch.Success && double.TryParse(sizeMatch.Groups[1].Value, out var sizeValue))
+                {
+                    format.FileSize = (long)UnitToBytes(sizeMatch.Groups[2].Value, sizeValue);
+                    format.FileSizeEstimated = estimated;
+                }
+            }
+        }
 
         var dimsMatch = Regex.Match(line, @"(\d+)\s*x\s*(\d+)");
         if (dimsMatch.Success)
@@ -322,6 +366,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
             arguments = $"{arguments} {uaArg}";
 
         var errorMessages = new List<string>();
+        var progressState = new DownloadProgressState();
         var progress = new Progress<string>(line =>
         {
             if (line.IndexOf("error:", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -329,7 +374,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
                 _logger.LogError("Download", $"yt-dlp 错误: {line}");
                 errorMessages.Add(line);
             }
-            ParseProgress(line, task);
+            ParseProgress(line, task, progressState);
             _messenger.Send(new DownloadTaskProgressMessage(task.Id, task.Progress, task.DownloadedBytes, task.TotalBytes, task.Speed));
         });
 
@@ -340,6 +385,19 @@ if (json.RootElement.TryGetProperty("url", out var u))
         {
             task.Status = DownloadTaskStatus.Cancelled;
             _logger.LogInfo("Download", $"下载已取消: {task.Title}");
+        }
+        else if (task.Status is DownloadTaskStatus.Paused or DownloadTaskStatus.Cancelled)
+        {
+            if (exitCode == 0)
+            {
+                task.Status = DownloadTaskStatus.Completed;
+                task.Progress = 100;
+                _logger.LogInfo("Download", $"下载完成（暂停/取消前已结束）: {task.Title}");
+            }
+            else
+            {
+                _logger.LogInfo("Download", $"下载已中止（保留状态 {task.Status}）: {task.Title}");
+            }
         }
         else if (exitCode == 0)
         {
@@ -364,15 +422,21 @@ if (json.RootElement.TryGetProperty("url", out var u))
         if (task.Status == DownloadTaskStatus.Downloading)
         {
             _processRunner.KillProcess(task.ProcessId);
-            task.Status = DownloadTaskStatus.Paused;
-            _messenger.Send(new DownloadTaskStatusChangedMessage(task.Id, task.Status));
         }
+        else if (task.Status != DownloadTaskStatus.Waiting)
+        {
+            return Task.CompletedTask;
+        }
+
+        task.Status = DownloadTaskStatus.Paused;
+        _logger.LogInfo("Download", $"下载已暂停: {task.Title}");
+        _messenger.Send(new DownloadTaskStatusChangedMessage(task.Id, task.Status));
         return Task.CompletedTask;
     }
 
     public async Task ResumeDownloadAsync(DownloadTaskModel task, CancellationToken cancellationToken)
     {
-        if (task.Status != DownloadTaskStatus.Paused)
+        if (task.Status is not (DownloadTaskStatus.Paused or DownloadTaskStatus.Waiting))
             return;
 
         var downloader = _siteDownloaders.FirstOrDefault(s => s.CanHandle(task.Url)) ?? _siteDownloaders.First();
@@ -398,6 +462,7 @@ if (json.RootElement.TryGetProperty("url", out var u))
             arguments = $"{arguments} {uaArg}";
 
         var errorMessages = new List<string>();
+        var progressState = new DownloadProgressState();
         var progress = new Progress<string>(line =>
         {
             if (line.IndexOf("error:", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -405,17 +470,53 @@ if (json.RootElement.TryGetProperty("url", out var u))
                 _logger.LogError("Download", $"yt-dlp 错误: {line}");
                 errorMessages.Add(line);
             }
-            ParseProgress(line, task);
+            ParseProgress(line, task, progressState);
             _messenger.Send(new DownloadTaskProgressMessage(task.Id, task.Progress, task.DownloadedBytes, task.TotalBytes, task.Speed));
         });
 
-        await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken,
+        var exitCode = await _processRunner.RunProcessAsync(ytDlpPath, arguments, task.OutputPath, progress, cancellationToken,
             pid => task.ProcessId = pid);
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            task.Status = DownloadTaskStatus.Cancelled;
+            _logger.LogInfo("Download", $"下载已取消: {task.Title}");
+        }
+        else if (task.Status is DownloadTaskStatus.Paused or DownloadTaskStatus.Cancelled)
+        {
+            if (exitCode == 0)
+            {
+                task.Status = DownloadTaskStatus.Completed;
+                task.Progress = 100;
+                _logger.LogInfo("Download", $"下载完成（暂停/取消前已结束）: {task.Title}");
+            }
+            else
+            {
+                _logger.LogInfo("Download", $"继续下载已中止（保留状态 {task.Status}）: {task.Title}");
+            }
+        }
+        else if (exitCode == 0)
+        {
+            task.Status = DownloadTaskStatus.Completed;
+            task.Progress = 100;
+            _logger.LogInfo("Download", $"下载完成: {task.Title}");
+        }
+        else
+        {
+            task.Status = DownloadTaskStatus.Failed;
+            var detail = errorMessages.Count > 0 ? errorMessages[0] : string.Empty;
+            task.ErrorMessage = string.IsNullOrWhiteSpace(detail) ? $"进程退出码: {exitCode}" : detail;
+            _logger.LogError("Download", $"下载失败: {task.Title} - {task.ErrorMessage}");
+        }
+
+        _messenger.Send(new DownloadTaskStatusChangedMessage(task.Id, task.Status));
+        _messenger.Send(new DownloadTaskCompletedMessage(task.Id, task.Status == DownloadTaskStatus.Completed, task.ErrorMessage));
     }
 
     public Task CancelDownloadAsync(DownloadTaskModel task)
     {
-        _processRunner.KillProcess(task.ProcessId);
+        if (task.Status == DownloadTaskStatus.Downloading)
+            _processRunner.KillProcess(task.ProcessId);
         task.Status = DownloadTaskStatus.Cancelled;
         task.Progress = 0;
         task.DownloadedBytes = 0;
@@ -424,11 +525,31 @@ if (json.RootElement.TryGetProperty("url", out var u))
         return Task.CompletedTask;
     }
 
-    private static void ParseProgress(string line, DownloadTaskModel task)
+    /// <summary>单个下载会话的进度解析状态：按 yt-dlp 的 Destination 行区分各文件（视频/音频），进度与大小按所有文件合计。</summary>
+    private sealed class DownloadProgressState
     {
-        var progressMatch = Regex.Match(line, @"(\d+\.?\d*)%");
-        if (progressMatch.Success && double.TryParse(progressMatch.Groups[1].Value, out var pct))
-            task.Progress = pct;
+        public string? CurrentFile;
+        public readonly Dictionary<string, long> FileTotals = new(StringComparer.OrdinalIgnoreCase);
+        public readonly Dictionary<string, long> FileDownloaded = new(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void ParseProgress(string line, DownloadTaskModel task, DownloadProgressState state)
+    {
+        const string destinationMarker = "[download] Destination:";
+        var destinationIndex = line.IndexOf(destinationMarker, StringComparison.OrdinalIgnoreCase);
+        if (destinationIndex >= 0)
+        {
+            var file = line[(destinationIndex + destinationMarker.Length)..].Trim();
+            if (!string.IsNullOrEmpty(file))
+            {
+                state.CurrentFile = file;
+                if (!state.FileTotals.ContainsKey(file))
+                {
+                    state.FileTotals[file] = 0;
+                    state.FileDownloaded[file] = 0;
+                }
+            }
+        }
 
         var speedMatch = Regex.Match(line, @"(\d+\.?\d*)([KMGT]?i?B)/s");
         if (speedMatch.Success && double.TryParse(speedMatch.Groups[1].Value, out var speed))
@@ -437,30 +558,67 @@ if (json.RootElement.TryGetProperty("url", out var u))
             task.Speed = UnitToBytes(unit, speed);
         }
 
+        double? percent = null;
+        var progressMatch = Regex.Match(line, @"(\d+\.?\d*)%");
+        if (progressMatch.Success && double.TryParse(progressMatch.Groups[1].Value, out var pct))
+            percent = pct;
+
+        long? downloaded = null;
+        long? total = null;
+
         var sizeMatch = Regex.Match(line, @"(\d+\.?\d*)([KMGT]?i?B)\s*/\s*(\d+\.?\d*)([KMGT]?i?B)");
         if (sizeMatch.Success)
         {
-            double.TryParse(sizeMatch.Groups[1].Value, out var downloaded);
-            double.TryParse(sizeMatch.Groups[3].Value, out var total);
-            task.DownloadedBytes = (long)UnitToBytes(sizeMatch.Groups[2].Value, downloaded);
-            task.TotalBytes = (long)UnitToBytes(sizeMatch.Groups[4].Value, total);
+            double.TryParse(sizeMatch.Groups[1].Value, out var downloadedValue);
+            double.TryParse(sizeMatch.Groups[3].Value, out var totalValue);
+            downloaded = (long)UnitToBytes(sizeMatch.Groups[2].Value, downloadedValue);
+            total = (long)UnitToBytes(sizeMatch.Groups[4].Value, totalValue);
         }
         else
         {
             var ofMatch = Regex.Match(line, @"(\d+\.?\d*)%\s*of\s*~?\s*(\d+\.?\d*)([KMGT]?i?B)");
             if (ofMatch.Success
                 && double.TryParse(ofMatch.Groups[1].Value, out var pctOf)
-                && double.TryParse(ofMatch.Groups[2].Value, out var total))
+                && double.TryParse(ofMatch.Groups[2].Value, out var ofTotal))
             {
-                task.TotalBytes = (long)UnitToBytes(ofMatch.Groups[3].Value, total);
-                task.DownloadedBytes = (long)(task.TotalBytes * pctOf / 100.0);
+                total = (long)UnitToBytes(ofMatch.Groups[3].Value, ofTotal);
+                downloaded = (long)(total.Value * pctOf / 100.0);
             }
             else
             {
                 var atMatch = Regex.Match(line, @"(\d+\.?\d*)([KMGT]?i?B)\s+at\s+");
-                if (atMatch.Success && double.TryParse(atMatch.Groups[1].Value, out var downloaded))
-                    task.DownloadedBytes = (long)UnitToBytes(atMatch.Groups[2].Value, downloaded);
+                if (atMatch.Success && double.TryParse(atMatch.Groups[1].Value, out var atDownloaded))
+                    downloaded = (long)UnitToBytes(atMatch.Groups[2].Value, atDownloaded);
             }
+        }
+
+        if (state.CurrentFile != null)
+        {
+            if (total.HasValue && total.Value > 0)
+                state.FileTotals[state.CurrentFile] = total.Value;
+            if (downloaded.HasValue)
+                state.FileDownloaded[state.CurrentFile] = downloaded.Value;
+        }
+
+        long combinedTotal = 0;
+        foreach (var fileTotal in state.FileTotals.Values)
+            combinedTotal += fileTotal;
+        long combinedDownloaded = 0;
+        foreach (var fileDownloaded in state.FileDownloaded.Values)
+            combinedDownloaded += fileDownloaded;
+
+        if (combinedTotal > 0)
+        {
+            task.TotalBytes = combinedTotal;
+            task.DownloadedBytes = Math.Clamp(combinedDownloaded, 0, combinedTotal);
+            task.Progress = Math.Min(100.0, combinedDownloaded * 100.0 / combinedTotal);
+        }
+        else
+        {
+            if (downloaded.HasValue)
+                task.DownloadedBytes = downloaded.Value;
+            if (percent.HasValue)
+                task.Progress = percent.Value;
         }
     }
 

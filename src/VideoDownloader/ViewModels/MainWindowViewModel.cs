@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -22,6 +23,9 @@ public partial class MainWindowViewModel : ReactiveObject
 
     [Reactive]
     private double _globalProgress;
+
+    [Reactive]
+    private double _globalProgressBarWidth;
 
     [Reactive]
     private string _proxyInfo = string.Empty;
@@ -117,17 +121,19 @@ public partial class MainWindowViewModel : ReactiveObject
 
     private void OnDownloadProgress(DownloadTaskProgressMessage msg)
     {
-        GlobalProgress = msg.Progress;
-        StatusText = $"正在下载... {msg.Progress:F1}%";
+        UpdateGlobalProgress();
+        StatusText = $"正在下载... {GlobalProgress:F1}%";
     }
 
     private void OnDownloadStatusChanged(DownloadTaskStatusChangedMessage msg)
     {
+        UpdateGlobalProgress();
         switch (msg.Status)
         {
             case DownloadTaskStatus.Completed:
-                GlobalProgress = 100;
-                StatusText = "下载完成";
+                var anyActive = DownloadViewModel.Tasks.Any(t =>
+                    t.Task.Status is DownloadTaskStatus.Downloading or DownloadTaskStatus.Waiting);
+                StatusText = anyActive ? $"正在下载... {GlobalProgress:F1}%" : "下载完成";
                 break;
             case DownloadTaskStatus.Failed:
                 StatusText = "下载失败";
@@ -139,6 +145,27 @@ public partial class MainWindowViewModel : ReactiveObject
                 StatusText = "下载已暂停";
                 break;
         }
+    }
+
+    /// <summary>左下角进度条：全部已开始任务（下载中/排队中/已暂停/已完成）按大小合计的全局进度；排队任务用 -F 预估大小计入，大小未知的任务不计入。</summary>
+    private void UpdateGlobalProgress()
+    {
+        long totalBytes = 0;
+        long downloadedBytes = 0;
+        foreach (var item in DownloadViewModel.Tasks)
+        {
+            var task = item.Task;
+            if (task.Status is DownloadTaskStatus.Cancelled or DownloadTaskStatus.Failed) continue;
+            if (task.TotalBytes <= 0) continue;
+            totalBytes += task.TotalBytes;
+            downloadedBytes += task.Status == DownloadTaskStatus.Completed
+                ? task.TotalBytes
+                : Math.Clamp(task.DownloadedBytes, 0, task.TotalBytes);
+        }
+
+        var percent = totalBytes > 0 ? Math.Clamp(downloadedBytes * 100.0 / totalBytes, 0, 100) : 0;
+        GlobalProgress = percent;
+        GlobalProgressBarWidth = percent * 1.4;
     }
 
     private void OnDependencyChanged(DependencyStatusChangedMessage msg)

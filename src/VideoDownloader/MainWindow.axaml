@@ -156,7 +156,7 @@ Background="{DynamicResource BackgroundLight}"
     <Border Grid.Row="4" Classes="StatusBar" MinHeight="32">
       <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,0">
         <Border Grid.Column="0" Classes="StatusProgress" Width="140" Height="16" Margin="0,0,12,0">
-          <Border Background="{DynamicResource ButtonLight}" Width="{Binding GlobalProgress}" Height="14" HorizontalAlignment="Left" CornerRadius="3" />
+          <Border Background="{DynamicResource ButtonLight}" Width="{Binding GlobalProgressBarWidth}" Height="14" HorizontalAlignment="Left" CornerRadius="3" />
         </Border>
         <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource TextDark}" />
         <Border Grid.Column="2" Classes="StatusProxy">

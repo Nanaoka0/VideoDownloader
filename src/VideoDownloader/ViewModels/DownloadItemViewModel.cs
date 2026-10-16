@@ -37,6 +37,9 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     private string _statusDisplay = "待添加";
 
     [Reactive]
+    private double _progress;
+
+    [Reactive]
     private string _taskTitle = string.Empty;
 
     [Reactive]
@@ -50,6 +53,9 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
 
     [Reactive]
     private VideoFormatModel? _selectedFormat;
+
+    [Reactive]
+    private string _startActionTip = "开始";
 
     public ObservableCollection<VideoFormatModel> AvailableFormats { get; } = new();
 
@@ -74,7 +80,11 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
 
         _subscriptions.Add(this.WhenAnyValue(x => x.SelectedFormat)
             .Where(f => f != null)
-            .Subscribe(f => Task.SelectedFormat = f));
+            .Subscribe(f =>
+            {
+                Task.SelectedFormat = f;
+                ApplyEstimatedSize();
+            }));
         _subscriptions.Add(_messenger.Subscribe<DownloadTaskProgressMessage>(OnProgress));
         _subscriptions.Add(_messenger.Subscribe<DownloadTaskStatusChangedMessage>(OnStatusChanged));
     }
@@ -83,6 +93,11 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     public async Task FetchResolutions()
     {
         if (IsRunning) return;
+        await FetchResolutionsCoreAsync();
+    }
+
+    private async Task FetchResolutionsCoreAsync()
+    {
         _messenger.Send(new StatusUpdateMessage("正在获取分辨率..."));
 
         Task.Status = DownloadTaskStatus.Parsing;
@@ -117,21 +132,50 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     public async Task Start()
     {
         if (IsRunning) return;
+        if (Task.Status == DownloadTaskStatus.Paused)
+        {
+            await Resume();
+            return;
+        }
+
+        IsRunning = true;
+        Task.Status = DownloadTaskStatus.Waiting;
+        if (SelectedFormat == null && AvailableFormats.Count > 0)
+            SelectedFormat = Enumerable.FirstOrDefault(AvailableFormats, f => f.HasVideo) ?? AvailableFormats[0];
+        ApplyEstimatedSize();
+        UpdateStatusDisplay();
+        _messenger.Send(new DownloadTaskStatusChangedMessage(Task.Id, Task.Status));
+
         await _concurrencySemaphore.WaitAsync();
         try
         {
+            if (Task.Status != DownloadTaskStatus.Waiting) return;
+
             if (AvailableFormats.Count == 0)
             {
-                await FetchResolutions();
-                if (Task.Status == DownloadTaskStatus.Failed) return;
+                await FetchResolutionsCoreAsync();
+                Task.Status = DownloadTaskStatus.Waiting;
+                if (SelectedFormat == null && AvailableFormats.Count > 0)
+                    SelectedFormat = Enumerable.FirstOrDefault(AvailableFormats, f => f.HasVideo) ?? AvailableFormats[0];
+                ApplyEstimatedSize();
+                UpdateStatusDisplay();
             }
-            if (SelectedFormat == null && AvailableFormats.Count > 0)
-                SelectedFormat = Enumerable.FirstOrDefault(AvailableFormats, f => f.HasVideo) ?? AvailableFormats[0];
-            if (SelectedFormat == null) return;
-            IsRunning = true;
+
+            if (SelectedFormat == null)
+            {
+                Task.Status = DownloadTaskStatus.Pending;
+                _messenger.Send(new DownloadTaskStatusChangedMessage(Task.Id, Task.Status));
+                return;
+            }
+
+            _cts?.Dispose();
             _cts = new CancellationTokenSource();
-            Task.Status = DownloadTaskStatus.Waiting;
-            UpdateStatusDisplay();
+            Progress = 0;
+            ProgressDisplay = "-";
+            SpeedDisplay = "-";
+            Task.Progress = 0;
+            Task.DownloadedBytes = 0;
+
             try
             {
                 await _downloadService.StartDownloadAsync(Task, _cts.Token);
@@ -145,12 +189,12 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
                 Task.Status = DownloadTaskStatus.Pending;
                 Task.ErrorMessage = ex.Message;
             }
-            IsRunning = false;
-            UpdateStatusDisplay();
         }
         finally
         {
+            IsRunning = false;
             _concurrencySemaphore.Release();
+            UpdateStatusDisplay();
         }
     }
 
@@ -164,18 +208,41 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     [ReactiveCommand]
     public async Task Resume()
     {
-        _cts = new CancellationTokenSource();
+        if (IsRunning) return;
+        if (Task.Status != DownloadTaskStatus.Paused) return;
+
         IsRunning = true;
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        Task.Status = DownloadTaskStatus.Waiting;
+        UpdateStatusDisplay();
+        _messenger.Send(new DownloadTaskStatusChangedMessage(Task.Id, Task.Status));
+
+        await _concurrencySemaphore.WaitAsync();
         try
         {
-            await _downloadService.ResumeDownloadAsync(Task, _cts.Token);
+            if (Task.Status != DownloadTaskStatus.Waiting) return;
+
+            try
+            {
+                await _downloadService.ResumeDownloadAsync(Task, _cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Task.Status = DownloadTaskStatus.Cancelled;
+            }
+            catch (Exception ex)
+            {
+                Task.Status = DownloadTaskStatus.Pending;
+                Task.ErrorMessage = ex.Message;
+            }
         }
-        catch (OperationCanceledException)
+        finally
         {
-            Task.Status = DownloadTaskStatus.Cancelled;
+            IsRunning = false;
+            _concurrencySemaphore.Release();
+            UpdateStatusDisplay();
         }
-        IsRunning = false;
-        UpdateStatusDisplay();
     }
 
     [ReactiveCommand]
@@ -198,9 +265,31 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
         }
     }
 
+    /// <summary>排队阶段把所选格式（视频流 + 自动搭配的最佳音频流）的 -F 大小合计预填到任务大小显示；下载开始后被真实值覆盖。</summary>
+    private void ApplyEstimatedSize()
+    {
+        if (Task.Status != DownloadTaskStatus.Waiting) return;
+
+        var (bytes, estimated) = EstimateSelectionSize();
+        Task.TotalBytes = bytes;
+        SizeDisplay = bytes > 0
+            ? $"- / {(estimated ? "≈" : "")}{FormatBytes(bytes)}"
+            : "- / -";
+    }
+
+    /// <summary>合计所选视频流与将自动搭配的音频流大小（搭配音频大小由 DownloadService 解析后预匹配到 CompanionAudioSize，规则与下载时一致）。</summary>
+    private (long Bytes, bool Estimated) EstimateSelectionSize()
+    {
+        if (SelectedFormat == null || SelectedFormat.FileSize <= 0) return (0, false);
+
+        return (SelectedFormat.FileSize + SelectedFormat.CompanionAudioSize,
+            SelectedFormat.FileSizeEstimated || SelectedFormat.CompanionAudioEstimated);
+    }
+
     private void OnProgress(DownloadTaskProgressMessage msg)
     {
         if (msg.TaskId != Task.Id) return;
+        Progress = msg.Progress;
         ProgressDisplay = $"{msg.Progress:F1}%";
         SizeDisplay = $"{FormatBytes(msg.DownloadedBytes)} / {FormatBytes(msg.TotalBytes)}";
         SpeedDisplay = FormatSpeed(msg.Speed);
@@ -210,6 +299,16 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
     {
         if (msg.TaskId != Task.Id) return;
         Task.Status = msg.Status;
+        if (msg.Status == DownloadTaskStatus.Completed)
+        {
+            Progress = 100;
+            ProgressDisplay = "100.0%";
+        }
+        else if (msg.Status == DownloadTaskStatus.Cancelled)
+        {
+            Progress = 0;
+            ProgressDisplay = "-";
+        }
         UpdateStatusDisplay();
     }
 
@@ -227,6 +326,7 @@ public partial class DownloadItemViewModel : ReactiveObject, IDisposable
             DownloadTaskStatus.Failed => $"失败: {Task.ErrorMessage}",
             _ => "未知"
         };
+        StartActionTip = Task.Status == DownloadTaskStatus.Paused ? "继续" : "开始";
     }
 
     private static string FormatBytes(long bytes) => bytes switch

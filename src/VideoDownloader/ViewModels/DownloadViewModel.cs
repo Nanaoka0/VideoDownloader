@@ -48,6 +48,9 @@ public partial class DownloadViewModel : ReactiveObject
     [Reactive]
     private string _globalResolution = "批量设置分辨率";
 
+    [Reactive]
+    private string _startAllButtonText = "开始下载";
+
     public IReadOnlyList<string> GlobalResolutionItems { get; } =
         new[] { "批量设置分辨率", "最高可用", "4K120fps", "4K60fps", "4K30fps", "4K24fps", "2K120fps", "2K60fps", "2K30fps", "2K24fps",
                 "1080P120fps", "1080P60fps", "1080P30fps", "1080P24fps",
@@ -61,6 +64,8 @@ public partial class DownloadViewModel : ReactiveObject
     public Interaction<Unit, string?> PickOutputFolder { get; } = new();
 
     private SemaphoreSlim _concurrencySemaphore;
+    private readonly IDisposable _taskCompletedSubscription;
+    private readonly IDisposable _statusChangedSubscription;
 
     public DownloadViewModel(
         IDownloadService downloadService,
@@ -93,7 +98,8 @@ public partial class DownloadViewModel : ReactiveObject
         this.WhenAnyValue(x => x.MaxConcurrentDownloads)
             .Subscribe(v => _concurrencySemaphore = new SemaphoreSlim(v, v));
 
-        _messenger.Subscribe<DownloadTaskCompletedMessage>(OnTaskCompleted);
+        _taskCompletedSubscription = _messenger.Subscribe<DownloadTaskCompletedMessage>(OnTaskCompleted);
+        _statusChangedSubscription = _messenger.Subscribe<DownloadTaskStatusChangedMessage>(_ => UpdateStartAllButtonText());
     }
 
     [ReactiveCommand]
@@ -179,6 +185,7 @@ public partial class DownloadViewModel : ReactiveObject
     {
         Tasks.Remove(item);
         item.Dispose();
+        UpdateStartAllButtonText();
     }
 
     [ReactiveCommand]
@@ -282,18 +289,22 @@ public partial class DownloadViewModel : ReactiveObject
     [ReactiveCommand]
     public async Task StartAllDownloads()
     {
-        _messenger.Send(new StatusUpdateMessage("正在开始下载..."));
         var pending = Tasks.Where(t => t.Task.Status == DownloadTaskStatus.Pending).ToList();
-        if (pending.Count == 0) return;
+        var paused = Tasks.Where(t => t.Task.Status == DownloadTaskStatus.Paused).ToList();
+        if (pending.Count == 0 && paused.Count == 0) return;
+
+        _messenger.Send(new StatusUpdateMessage(paused.Count > 0 ? "正在继续下载..." : "正在开始下载..."));
         foreach (var item in pending)
             _ = RunTaskAsync(item);
+        foreach (var item in paused)
+            _ = item.ResumeCommand.Execute(Unit.Default).Subscribe(_ => { }, ex => _logger.LogException("Download", "继续下载失败", ex));
     }
 
     [ReactiveCommand]
     public void PauseAllTasks()
     {
         _messenger.Send(new StatusUpdateMessage("正在暂停所有任务..."));
-        foreach (var item in Tasks.Where(t => t.Task.Status == DownloadTaskStatus.Downloading))
+        foreach (var item in Tasks.Where(t => t.Task.Status is DownloadTaskStatus.Downloading or DownloadTaskStatus.Waiting))
             _ = item.PauseCommand.Execute(Unit.Default).Subscribe(_ => { }, ex => _logger.LogException("Download", "暂停任务失败", ex));
         _messenger.Send(new StatusUpdateMessage("已暂停所有下载"));
     }
@@ -319,6 +330,9 @@ public partial class DownloadViewModel : ReactiveObject
         _config.PreferHdr = PreferHdr;
         _config.Save();
     }
+
+    private void UpdateStartAllButtonText() =>
+        StartAllButtonText = Tasks.Any(t => t.Task.Status == DownloadTaskStatus.Paused) ? "继续下载" : "开始下载";
 
     private void OnTaskCompleted(DownloadTaskCompletedMessage msg)
     {
