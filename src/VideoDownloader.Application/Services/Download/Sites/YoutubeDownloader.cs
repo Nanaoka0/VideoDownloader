@@ -49,14 +49,15 @@ public class YoutubeDownloader : ISiteDownloader
     public string BuildDownloadArguments(string url, VideoFormatModel format, string outputPath)
     {
         var template = Path.Combine(outputPath, "%(title)s.%(ext)s");
+        var container = format.VideoCodec.Equals("VP9", StringComparison.OrdinalIgnoreCase) ? "webm" : "mp4";
         string formatArg;
         if (format.IsAudioOnly)
             formatArg = $"-f {format.FormatId}";
         else if (format.HasVideo && !format.HasAudio && !format.FormatId.Contains('+'))
-            formatArg = DownloadFormatHelpers.BuildVideoPlusAudioArgument(format.FormatId, "mp4");
+            formatArg = DownloadFormatHelpers.BuildVideoPlusAudioArgument(format.FormatId, container);
         else
             formatArg = $"-f {format.FormatId}";
-        var merge = format.IsAudioOnly ? string.Empty : "--merge-output-format mp4";
+        var merge = format.IsAudioOnly ? string.Empty : $"--merge-output-format {container}/mkv";
         return $"{formatArg} {merge} -o \"{template}\" \"{url}\"".Trim();
     }
 }
