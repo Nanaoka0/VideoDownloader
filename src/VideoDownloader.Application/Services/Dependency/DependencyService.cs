@@ -206,9 +206,11 @@ _nvencVerified = true;
 
         try
         {
+            // ffmpeg 的驱动版本报错输出在 stderr，须合并读取才能识别
             var output = await _processRunner.RunProcessAndReadOutputAsync(ffmpegPath,
                 "-hide_banner -f lavfi -i testsrc=duration=1:size=320x240:rate=10 -pix_fmt yuv420p -c:v av1_nvenc -f null -",
-                CancellationToken.None);
+                CancellationToken.None,
+                includeStandardError: true);
 
             if (output != null &&
                 (output.Contains("minimum required Nvidia driver", StringComparison.OrdinalIgnoreCase) ||

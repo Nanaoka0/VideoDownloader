@@ -174,7 +174,7 @@ public class ProcessRunner : IProcessRunner, IDisposable
         }
     }
 
-    public async Task<string?> RunProcessAndReadOutputAsync(string fileName, string arguments, CancellationToken cancellationToken)
+    public async Task<string?> RunProcessAndReadOutputAsync(string fileName, string arguments, CancellationToken cancellationToken, bool includeStandardError = false)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -191,9 +191,20 @@ public class ProcessRunner : IProcessRunner, IDisposable
         using var winProcess = new WinProcess { StartInfo = startInfo };
         winProcess.Start();
 
-        var output = await winProcess.StandardOutput.ReadToEndAsync();
+        // 两股流必须同时消费，避免管道缓冲区写满导致进程阻塞
+        var outputTask = winProcess.StandardOutput.ReadToEndAsync();
+        var errorTask = winProcess.StandardError.ReadToEndAsync();
+        await Task.WhenAll(outputTask, errorTask);
         await winProcess.WaitForExitAsync(cancellationToken);
-        return output;
+
+        var output = outputTask.Result;
+        if (!includeStandardError)
+            return output;
+
+        var error = errorTask.Result;
+        if (string.IsNullOrEmpty(error))
+            return output;
+        return string.IsNullOrEmpty(output) ? error : output + Environment.NewLine + error;
     }
 
     public void Dispose()

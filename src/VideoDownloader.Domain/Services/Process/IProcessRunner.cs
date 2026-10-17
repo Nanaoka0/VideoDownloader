@@ -7,5 +7,5 @@ public interface IProcessRunner
     void KillProcess(int processId);
     bool IsRunning(int processId);
     int StartProcess(string fileName, string arguments, string workingDirectory);
-    Task<string?> RunProcessAndReadOutputAsync(string fileName, string arguments, CancellationToken cancellationToken);
+    Task<string?> RunProcessAndReadOutputAsync(string fileName, string arguments, CancellationToken cancellationToken, bool includeStandardError = false);
 }

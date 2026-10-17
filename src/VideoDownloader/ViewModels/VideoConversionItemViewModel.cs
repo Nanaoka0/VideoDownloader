@@ -39,6 +39,9 @@ public partial class VideoConversionItemViewModel : ReactiveObject, IDisposable
     private string _progressDisplay = "-";
 
     [Reactive]
+    private double _progress;
+
+    [Reactive]
     private VideoContainer _selectedContainer;
 
     [Reactive]
@@ -192,6 +195,8 @@ public partial class VideoConversionItemViewModel : ReactiveObject, IDisposable
         if (IsRunning) return;
         IsRunning = true;
         _cts = new CancellationTokenSource();
+        Progress = 0;
+        ProgressDisplay = "-";
 
         try
         {
@@ -234,6 +239,7 @@ public partial class VideoConversionItemViewModel : ReactiveObject, IDisposable
     private void OnProgress(ConversionTaskProgressMessage msg)
     {
         if (msg.TaskId != Task.Id) return;
+        Progress = msg.Progress;
         ProgressDisplay = $"{msg.Progress:F1}%";
     }
 
@@ -241,6 +247,16 @@ public partial class VideoConversionItemViewModel : ReactiveObject, IDisposable
     {
         if (msg.TaskId != Task.Id) return;
         Task.Status = msg.Status;
+        if (msg.Status == ConversionTaskStatus.Completed)
+        {
+            Progress = 100;
+            ProgressDisplay = "100.0%";
+        }
+        else if (msg.Status is ConversionTaskStatus.Stopped or ConversionTaskStatus.Cancelled)
+        {
+            Progress = 0;
+            ProgressDisplay = "-";
+        }
         UpdateStatusDisplay();
     }
 

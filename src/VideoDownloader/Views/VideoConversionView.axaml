@@ -32,7 +32,7 @@
                         <TextBlock Text="{Binding StatusDisplay}" TextWrapping="Wrap" MaxLines="1" TextTrimming="CharacterEllipsis" Classes="StatusText" />
                         <TextBlock Text="{Binding ProgressDisplay}" Classes="StatusText" />
                       </StackPanel>
-                      <ProgressBar Value="{Binding Task.Progress}" Height="6" Margin="0,6,0,0" />
+                      <ProgressBar Value="{Binding Progress}" Height="6" Margin="0,6,0,0" />
                     </StackPanel>
                     <ComboBox Grid.Column="2" ItemsSource="{Binding AvailableContainers}" SelectedItem="{Binding SelectedContainer}" Margin="4" Height="28" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                     <ComboBox Grid.Column="3" ItemsSource="{Binding AvailableVideoCodecs}" SelectedItem="{Binding SelectedVideoCodec}" Margin="4" Height="28" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
