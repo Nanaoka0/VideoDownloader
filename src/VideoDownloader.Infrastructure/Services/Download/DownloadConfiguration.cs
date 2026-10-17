@@ -13,7 +13,7 @@ public partial class DownloadConfigurationJsonContext : JsonSerializerContext
 
 public class DownloadConfiguration : IDownloadConfiguration
 {
-    private ILogger _logger;
+    private ILogger? _logger;
 
     public DownloadConfiguration(ILogger logger)
     {
@@ -74,7 +74,7 @@ public class DownloadConfiguration : IDownloadConfiguration
             var json = JsonSerializer.Serialize(this, DownloadConfigurationJsonContext.Default.DownloadConfiguration);
             File.WriteAllText(ConfigPath, json);
         }
-        catch (Exception ex) { _logger.LogException("Config", $"保存配置文件失败: {ConfigPath}", ex); }
+        catch (Exception ex) { _logger?.LogException("Config", $"保存配置文件失败: {ConfigPath}", ex); }
     }
 
     public string GetProxyArgument()

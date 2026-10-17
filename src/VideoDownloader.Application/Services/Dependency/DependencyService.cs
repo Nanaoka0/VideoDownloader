@@ -135,9 +135,8 @@ public class DependencyService : IDependencyService
             catch (OperationCanceledException)
             {
                 throw;
-_nvencVerified = true;
-        }
-        catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 lastException = ex;
                 _logger.LogException("Dependency", $"ffmpeg 下载失败（源：{url}）", ex);
